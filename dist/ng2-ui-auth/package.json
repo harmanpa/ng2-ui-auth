@@ -1,22 +1,20 @@
 {
   "name": "ng2-ui-auth",
   "version": "10.0.1",
+  "dependencies": {
+    "tslib": "^2.0.0"
+  },
   "peerDependencies": {
-    "@angular/common": "^9.1.12",
-    "@angular/core": "^9.1.12",
+    "@angular/common": "^10.2.3",
+    "@angular/core": "^10.2.3",
     "rxjs": "^6.6.3"
   },
   "main": "bundles/ng2-ui-auth.umd.js",
-  "module": "fesm5/ng2-ui-auth.js",
+  "module": "fesm2015/ng2-ui-auth.js",
   "es2015": "fesm2015/ng2-ui-auth.js",
-  "esm5": "esm5/ng2-ui-auth.js",
   "esm2015": "esm2015/ng2-ui-auth.js",
-  "fesm5": "fesm5/ng2-ui-auth.js",
   "fesm2015": "fesm2015/ng2-ui-auth.js",
   "typings": "ng2-ui-auth.d.ts",
   "metadata": "ng2-ui-auth.metadata.json",
-  "sideEffects": false,
-  "dependencies": {
-    "tslib": "^1.10.0"
-  }
+  "sideEffects": false
 }

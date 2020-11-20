@@ -1,9 +1,12 @@
 {
   "name": "ng2-ui-auth",
   "version": "10.0.1",
+  "dependencies": {
+    "tslib": "^2.0.0"
+  },
   "peerDependencies": {
-    "@angular/common": "^9.1.12",
-    "@angular/core": "^9.1.12",
+    "@angular/common": "^10.2.3",
+    "@angular/core": "^10.2.3",
     "rxjs": "^6.6.3"
   }
 }

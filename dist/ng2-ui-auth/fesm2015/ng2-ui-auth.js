@@ -1,7 +1,6 @@
-import { __decorate, __param, __metadata } from 'tslib';
-import { InjectionToken, Inject, Injectable, Injector, NgModule } from '@angular/core';
+import { InjectionToken, Injectable, Inject, Injector, NgModule } from '@angular/core';
 import { HttpClient, HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
-import { Observable, of, empty, merge, fromEvent, interval, throwError } from 'rxjs';
+import { Observable, of, throwError, merge, fromEvent, empty, interval } from 'rxjs';
 import { delay, map, switchMap, take, tap } from 'rxjs/operators';
 
 /**
@@ -181,7 +180,7 @@ var StorageType;
 })(StorageType || (StorageType = {}));
 
 const CONFIG_OPTIONS = new InjectionToken('config.options');
-let ConfigService = class ConfigService {
+class ConfigService {
     constructor(options) {
         this.options = {
             withCredentials: false,
@@ -238,20 +237,18 @@ let ConfigService = class ConfigService {
             }
         });
     }
-};
+}
+ConfigService.decorators = [
+    { type: Injectable }
+];
 ConfigService.ctorParameters = () => [
     { type: undefined, decorators: [{ type: Inject, args: [CONFIG_OPTIONS,] }] }
 ];
-ConfigService = __decorate([
-    Injectable(),
-    __param(0, Inject(CONFIG_OPTIONS)),
-    __metadata("design:paramtypes", [Object])
-], ConfigService);
 
 class StorageService {
 }
 
-let BrowserStorageService = class BrowserStorageService extends StorageService {
+class BrowserStorageService extends StorageService {
     constructor(config) {
         super();
         this.config = config;
@@ -378,16 +375,15 @@ let BrowserStorageService = class BrowserStorageService extends StorageService {
     getCookie(key) {
         return document.cookie.replace(new RegExp(`(?:(?:^|.*;\\s*)${key}\\s*\\=\\s*([^;]*).*$)|^.*$`), '$1');
     }
-};
+}
+BrowserStorageService.decorators = [
+    { type: Injectable }
+];
 BrowserStorageService.ctorParameters = () => [
     { type: ConfigService }
 ];
-BrowserStorageService = __decorate([
-    Injectable(),
-    __metadata("design:paramtypes", [ConfigService])
-], BrowserStorageService);
 
-let SharedService = class SharedService {
+class SharedService {
     constructor(storage, config) {
         this.storage = storage;
         this.config = config;
@@ -487,17 +483,16 @@ let SharedService = class SharedService {
     b64DecodeUnicode(str) {
         return decodeURIComponent(Array.prototype.map.call(atob(str), c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
     }
-};
+}
+SharedService.decorators = [
+    { type: Injectable }
+];
 SharedService.ctorParameters = () => [
     { type: StorageService },
     { type: ConfigService }
 ];
-SharedService = __decorate([
-    Injectable(),
-    __metadata("design:paramtypes", [StorageService, ConfigService])
-], SharedService);
 
-let JwtInterceptor = class JwtInterceptor {
+class JwtInterceptor {
     constructor(shared, config) {
         this.shared = shared;
         this.config = config;
@@ -509,20 +504,19 @@ let JwtInterceptor = class JwtInterceptor {
         const newReq = isAuthenticated && !req.headers.has(authHeader) ? req.clone({ setHeaders: { [authHeader]: `${authToken} ${token}` } }) : req;
         return next.handle(newReq);
     }
-};
+}
+JwtInterceptor.decorators = [
+    { type: Injectable }
+];
 JwtInterceptor.ctorParameters = () => [
     { type: SharedService },
     { type: ConfigService }
 ];
-JwtInterceptor = __decorate([
-    Injectable(),
-    __metadata("design:paramtypes", [SharedService, ConfigService])
-], JwtInterceptor);
 
-let PopupService = class PopupService {
-    open(url, options, cordova = this.isCordovaApp()) {
+class PopupService {
+    open(url, options, isCordova = this.isCordovaApp()) {
         const stringifiedOptions = this.stringifyOptions(this.prepareOptions(options.popupOptions));
-        const windowName = cordova ? '_blank' : options.name;
+        const windowName = isCordova ? '_blank' : options.name;
         const popupWindow = typeof window !== 'undefined' ? window.open(url, windowName, stringifiedOptions) : null;
         if (popupWindow) {
             if (popupWindow.focus) {
@@ -530,10 +524,10 @@ let PopupService = class PopupService {
             }
             return of(popupWindow);
         }
-        return empty();
+        return throwError(new Error('Popup was not created'));
     }
-    waitForClose(popupWindow, cordova = this.isCordovaApp(), redirectUri = getWindowOrigin()) {
-        return cordova ? this.eventListener(popupWindow, redirectUri) : this.pollPopup(popupWindow, redirectUri);
+    waitForClose(popupWindow, isCordova = this.isCordovaApp(), redirectUri = getWindowOrigin()) {
+        return isCordova ? this.eventListener(popupWindow, redirectUri) : this.pollPopup(popupWindow, redirectUri);
     }
     eventListener(popupWindow, redirectUri = getWindowOrigin()) {
         if (!popupWindow) {
@@ -619,12 +613,12 @@ let PopupService = class PopupService {
     isCordovaApp() {
         return typeof cordova === 'object' || (document.URL.indexOf('http://') === -1 && document.URL.indexOf('https://') === -1);
     }
-};
-PopupService = __decorate([
-    Injectable()
-], PopupService);
+}
+PopupService.decorators = [
+    { type: Injectable }
+];
 
-let Oauth1Service = class Oauth1Service {
+class Oauth1Service {
     constructor(http, popup, config) {
         this.http = http;
         this.popup = popup;
@@ -645,18 +639,17 @@ let Oauth1Service = class Oauth1Service {
         const exchangeForTokenUrl = baseUrl ? joinUrl(baseUrl, url) : url;
         return this.http.request(method, exchangeForTokenUrl, { body, withCredentials });
     }
-};
+}
+Oauth1Service.decorators = [
+    { type: Injectable }
+];
 Oauth1Service.ctorParameters = () => [
     { type: HttpClient },
     { type: PopupService },
     { type: ConfigService }
 ];
-Oauth1Service = __decorate([
-    Injectable(),
-    __metadata("design:paramtypes", [HttpClient, PopupService, ConfigService])
-], Oauth1Service);
 
-let Oauth2Service = class Oauth2Service {
+class Oauth2Service {
     constructor(http, popup, config) {
         this.http = http;
         this.popup = popup;
@@ -714,18 +707,17 @@ let Oauth2Service = class Oauth2Service {
             .filter(_ => !!_[0])
             .reduce((acc, next) => (Object.assign(Object.assign({}, acc), { [next[0]]: next[1] })), {});
     }
-};
+}
+Oauth2Service.decorators = [
+    { type: Injectable }
+];
 Oauth2Service.ctorParameters = () => [
     { type: HttpClient },
     { type: PopupService },
     { type: ConfigService }
 ];
-Oauth2Service = __decorate([
-    Injectable(),
-    __metadata("design:paramtypes", [HttpClient, PopupService, ConfigService])
-], Oauth2Service);
 
-let OauthService = class OauthService {
+class OauthService {
     constructor(http, shared, config, popup) {
         this.http = http;
         this.shared = shared;
@@ -754,19 +746,18 @@ let OauthService = class OauthService {
     unlink(provider, url = joinUrl(this.config.options.baseUrl, this.config.options.unlinkUrl), method = 'POST') {
         return this.http.request(method, url, { body: { provider } });
     }
-};
+}
+OauthService.decorators = [
+    { type: Injectable }
+];
 OauthService.ctorParameters = () => [
     { type: HttpClient },
     { type: SharedService },
     { type: ConfigService },
     { type: PopupService }
 ];
-OauthService = __decorate([
-    Injectable(),
-    __metadata("design:paramtypes", [HttpClient, SharedService, ConfigService, PopupService])
-], OauthService);
 
-let LocalService = class LocalService {
+class LocalService {
     constructor(http, shared, config) {
         this.http = http;
         this.shared = shared;
@@ -780,18 +771,17 @@ let LocalService = class LocalService {
     signup(user, url) {
         return this.http.post(url || joinUrl(this.config.options.baseUrl, this.config.options.signupUrl), user);
     }
-};
+}
+LocalService.decorators = [
+    { type: Injectable }
+];
 LocalService.ctorParameters = () => [
     { type: HttpClient },
     { type: SharedService },
     { type: ConfigService }
 ];
-LocalService = __decorate([
-    Injectable(),
-    __metadata("design:paramtypes", [HttpClient, SharedService, ConfigService])
-], LocalService);
 
-let AuthService = class AuthService {
+class AuthService {
     constructor(shared, local, oauth) {
         this.shared = shared;
         this.local = local;
@@ -836,22 +826,20 @@ let AuthService = class AuthService {
     getExpirationDate() {
         return this.shared.getExpirationDate();
     }
-};
+}
+AuthService.decorators = [
+    { type: Injectable }
+];
 AuthService.ctorParameters = () => [
     { type: SharedService },
     { type: LocalService },
     { type: OauthService }
 ];
-AuthService = __decorate([
-    Injectable(),
-    __metadata("design:paramtypes", [SharedService, LocalService, OauthService])
-], AuthService);
 
-var Ng2UiAuthModule_1;
-let Ng2UiAuthModule = Ng2UiAuthModule_1 = class Ng2UiAuthModule {
+class Ng2UiAuthModule {
     static forRoot(configOptions, defaultJwtInterceptor = true) {
         return {
-            ngModule: Ng2UiAuthModule_1,
+            ngModule: Ng2UiAuthModule,
             providers: [
                 ...(configOptions ? [{ provide: CONFIG_OPTIONS, useValue: configOptions }] : []),
                 { provide: ConfigService, useClass: ConfigService, deps: [CONFIG_OPTIONS] },
@@ -867,14 +855,14 @@ let Ng2UiAuthModule = Ng2UiAuthModule_1 = class Ng2UiAuthModule {
             ]
         };
     }
-};
-Ng2UiAuthModule = Ng2UiAuthModule_1 = __decorate([
-    NgModule({
-        imports: [HttpClientModule],
-        declarations: [],
-        exports: []
-    })
-], Ng2UiAuthModule);
+}
+Ng2UiAuthModule.decorators = [
+    { type: NgModule, args: [{
+                imports: [HttpClientModule],
+                declarations: [],
+                exports: []
+            },] }
+];
 
 /**
  * Generated bundle index. Do not edit.
