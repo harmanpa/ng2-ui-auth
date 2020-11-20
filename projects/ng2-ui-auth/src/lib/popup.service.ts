@@ -7,9 +7,9 @@ import { getWindowOrigin } from './utils';
 declare const cordova: any;
 @Injectable()
 export class PopupService {
-  public open(url: string, options: IOauth2Options | IOauth1Options, cordova = this.isCordovaApp()) {
+  public open(url: string, options: IOauth2Options | IOauth1Options, isCordova = this.isCordovaApp()): Observable<Window> {
     const stringifiedOptions = this.stringifyOptions(this.prepareOptions(options.popupOptions));
-    const windowName = cordova ? '_blank' : options.name;
+    const windowName = isCordova ? '_blank' : options.name;
 
     const popupWindow = typeof window !== 'undefined' ? window.open(url, windowName, stringifiedOptions) : null;
 
@@ -19,11 +19,11 @@ export class PopupService {
       }
       return of(popupWindow);
     }
-    return empty();
+    return throwError(new Error('Popup was not created'));
   }
 
-  public waitForClose(popupWindow: Window, cordova = this.isCordovaApp(), redirectUri = getWindowOrigin()) {
-    return cordova ? this.eventListener(popupWindow, redirectUri) : this.pollPopup(popupWindow, redirectUri);
+  public waitForClose(popupWindow: Window, isCordova = this.isCordovaApp(), redirectUri = getWindowOrigin()) {
+    return isCordova ? this.eventListener(popupWindow, redirectUri) : this.pollPopup(popupWindow, redirectUri);
   }
 
   private eventListener(popupWindow: Window, redirectUri = getWindowOrigin()) {

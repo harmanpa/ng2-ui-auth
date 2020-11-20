@@ -1,48 +1,7 @@
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
- */
-/**
- * @abstract
- */
-var /**
- * @abstract
- */
-StorageService = /** @class */ (function () {
+var StorageService = /** @class */ (function () {
     function StorageService() {
     }
     return StorageService;
 }());
-/**
- * @abstract
- */
 export { StorageService };
-if (false) {
-    /**
-     * @abstract
-     * @param {?} storageType
-     * @return {?}
-     */
-    StorageService.prototype.updateStorageType = function (storageType) { };
-    /**
-     * @abstract
-     * @param {?} key
-     * @return {?}
-     */
-    StorageService.prototype.get = function (key) { };
-    /**
-     * @abstract
-     * @param {?} key
-     * @param {?} value
-     * @param {?} date
-     * @return {?}
-     */
-    StorageService.prototype.set = function (key, value, date) { };
-    /**
-     * @abstract
-     * @param {?} key
-     * @return {?}
-     */
-    StorageService.prototype.remove = function (key) { };
-}
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoic3RvcmFnZS1zZXJ2aWNlLmpzIiwic291cmNlUm9vdCI6Im5nOi8vbmcyLXVpLWF1dGgvIiwic291cmNlcyI6WyJsaWIvc3RvcmFnZS1zZXJ2aWNlLnRzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiI7Ozs7Ozs7QUFFQTs7OztJQUFBO0lBUUEsQ0FBQztJQUFELHFCQUFDO0FBQUQsQ0FBQyxBQVJELElBUUM7Ozs7Ozs7Ozs7O0lBUEMsd0VBQThEOzs7Ozs7SUFFOUQsa0RBQWtDOzs7Ozs7OztJQUVsQywrREFBNkQ7Ozs7OztJQUU3RCxxREFBbUMiLCJzb3VyY2VzQ29udGVudCI6WyJpbXBvcnQgeyBTdG9yYWdlVHlwZSB9IGZyb20gJy4vc3RvcmFnZS10eXBlLmVudW0nO1xyXG5cclxuZXhwb3J0IGFic3RyYWN0IGNsYXNzIFN0b3JhZ2VTZXJ2aWNlIHtcclxuICBhYnN0cmFjdCB1cGRhdGVTdG9yYWdlVHlwZShzdG9yYWdlVHlwZTogU3RvcmFnZVR5cGUpOiBib29sZWFuO1xyXG5cclxuICBhYnN0cmFjdCBnZXQoa2V5OiBzdHJpbmcpOiBzdHJpbmc7XHJcblxyXG4gIGFic3RyYWN0IHNldChrZXk6IHN0cmluZywgdmFsdWU6IHN0cmluZywgZGF0ZTogc3RyaW5nKTogdm9pZDtcclxuXHJcbiAgYWJzdHJhY3QgcmVtb3ZlKGtleTogc3RyaW5nKTogdm9pZDtcclxufVxyXG4iXX0=
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoic3RvcmFnZS1zZXJ2aWNlLmpzIiwic291cmNlUm9vdCI6Im5nOi8vbmcyLXVpLWF1dGgvIiwic291cmNlcyI6WyJsaWIvc3RvcmFnZS1zZXJ2aWNlLnRzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiJBQUVBO0lBQUE7SUFRQSxDQUFDO0lBQUQscUJBQUM7QUFBRCxDQUFDLEFBUkQsSUFRQyIsInNvdXJjZXNDb250ZW50IjpbImltcG9ydCB7IFN0b3JhZ2VUeXBlIH0gZnJvbSAnLi9zdG9yYWdlLXR5cGUuZW51bSc7XHJcblxyXG5leHBvcnQgYWJzdHJhY3QgY2xhc3MgU3RvcmFnZVNlcnZpY2Uge1xyXG4gIGFic3RyYWN0IHVwZGF0ZVN0b3JhZ2VUeXBlKHN0b3JhZ2VUeXBlOiBTdG9yYWdlVHlwZSk6IGJvb2xlYW47XHJcblxyXG4gIGFic3RyYWN0IGdldChrZXk6IHN0cmluZyk6IHN0cmluZztcclxuXHJcbiAgYWJzdHJhY3Qgc2V0KGtleTogc3RyaW5nLCB2YWx1ZTogc3RyaW5nLCBkYXRlOiBzdHJpbmcpOiB2b2lkO1xyXG5cclxuICBhYnN0cmFjdCByZW1vdmUoa2V5OiBzdHJpbmcpOiB2b2lkO1xyXG59XHJcbiJdfQ==

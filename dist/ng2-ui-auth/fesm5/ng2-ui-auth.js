@@ -1,24 +1,16 @@
-import { __assign, __extends, __spread } from 'tslib';
-import { InjectionToken, Injectable, Inject, Injector, NgModule } from '@angular/core';
+import { __assign, __decorate, __param, __metadata, __extends, __spread } from 'tslib';
+import { InjectionToken, Inject, Injectable, Injector, NgModule } from '@angular/core';
 import { HttpClient, HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 import { Observable, of, empty, merge, fromEvent, interval, throwError } from 'rxjs';
 import { delay, map, switchMap, take, tap } from 'rxjs/operators';
 
 /**
- * @fileoverview added by tsickle
- * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
- */
-/**
  * Created by Ron on 17/12/2015.
- * @param {?} baseUrl
- * @param {?} url
- * @return {?}
  */
 function joinUrl(baseUrl, url) {
     if (/^(?:[a-z]+:)?\/\//i.test(url)) {
         return url;
     }
-    /** @type {?} */
     var joined = [baseUrl, url].join('/');
     return joined
         .replace(/[\/]+/g, '/')
@@ -26,23 +18,11 @@ function joinUrl(baseUrl, url) {
         .replace(/\/\#/g, '#')
         .replace(/\:\//g, '://');
 }
-/**
- * @param {?} obj
- * @return {?}
- */
 function buildQueryString(obj) {
     return Object.keys(obj)
-        .map((/**
-     * @param {?} key
-     * @return {?}
-     */
-    function (key) { return (!!obj[key] ? encodeURIComponent(key) + "=" + encodeURIComponent(obj[key]) : key); }))
+        .map(function (key) { return (!!obj[key] ? encodeURIComponent(key) + "=" + encodeURIComponent(obj[key]) : key); })
         .join('&');
 }
-/**
- * @param {?=} w
- * @return {?}
- */
 function getWindowOrigin(w) {
     if (!w && typeof window !== 'undefined') {
         w = window;
@@ -63,26 +43,15 @@ function getWindowOrigin(w) {
     }
 }
 
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
- */
-var ɵ0 = /**
- * @return {?}
- */
-function () {
+var ɵ0 = function () {
     return encodeURIComponent(Math.random()
         .toString(36)
         .substr(2));
-}, ɵ1 = /**
- * @return {?}
- */
-function () {
+}, ɵ1 = function () {
     return encodeURIComponent(Math.random()
         .toString(36)
         .substr(2));
 };
-/** @type {?} */
 var defaultProviders = {
     facebook: {
         name: 'facebook',
@@ -114,7 +83,7 @@ var defaultProviders = {
         scopeDelimiter: ' ',
         oauthType: '2.0',
         popupOptions: { width: 452, height: 633 },
-        state: (ɵ0)
+        state: ɵ0
     },
     github: {
         name: 'github',
@@ -201,29 +170,20 @@ var defaultProviders = {
         scopeDelimiter: ',',
         oauthType: '2.0',
         popupOptions: { width: 500, height: 530 },
-        state: (ɵ1)
+        state: ɵ1
     }
 };
 
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
- */
-/** @enum {string} */
-var StorageType = {
-    NONE: 'none',
-    MEMORY: 'memory',
-    LOCAL_STORAGE: 'localStorage',
-    SESSION_STORAGE: 'sessionStorage',
-    COOKIE: 'cookie',
-    SESSION_COOKIE: 'sessionCookie',
-};
+var StorageType;
+(function (StorageType) {
+    StorageType["NONE"] = "none";
+    StorageType["MEMORY"] = "memory";
+    StorageType["LOCAL_STORAGE"] = "localStorage";
+    StorageType["SESSION_STORAGE"] = "sessionStorage";
+    StorageType["COOKIE"] = "cookie";
+    StorageType["SESSION_COOKIE"] = "sessionCookie";
+})(StorageType || (StorageType = {}));
 
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
- */
-/** @type {?} */
 var CONFIG_OPTIONS = new InjectionToken('config.options');
 var ConfigService = /** @class */ (function () {
     function ConfigService(options) {
@@ -241,13 +201,7 @@ var ConfigService = /** @class */ (function () {
             authToken: 'Bearer',
             storageType: StorageType.LOCAL_STORAGE,
             cordova: undefined,
-            resolveToken: (/**
-             * @param {?} response
-             * @param {?} config
-             * @return {?}
-             */
-            function (response, config) {
-                /** @type {?} */
+            resolveToken: function (response, config) {
                 var accessToken = response && (response.access_token || response.token || response.data);
                 if (!accessToken) {
                     // console.warn('No token found');
@@ -260,17 +214,10 @@ var ConfigService = /** @class */ (function () {
                     // console.warn('No token found');
                     return null;
                 }
-                /** @type {?} */
                 var tokenRootData = config.tokenRoot &&
-                    config.tokenRoot.split('.').reduce((/**
-                     * @param {?} o
-                     * @param {?} x
-                     * @return {?}
-                     */
-                    function (o, x) {
+                    config.tokenRoot.split('.').reduce(function (o, x) {
                         return o[x];
-                    }), accessToken);
-                /** @type {?} */
+                    }, accessToken);
                 var token = tokenRootData ? tokenRootData[config.tokenName] : accessToken[config.tokenName];
                 if (token) {
                     return token;
@@ -278,72 +225,41 @@ var ConfigService = /** @class */ (function () {
                 // const tokenPath = this.tokenRoot ? this.tokenRoot + '.' + this.tokenName : this.tokenName;
                 // console.warn('Expecting a token named "' + tokenPath);
                 return null;
-            }),
+            },
             providers: {}
         };
-        this.options = __assign({}, this.options, options);
+        this.options = __assign(__assign({}, this.options), options);
         this.mergeWithDefaultProviders();
     }
-    /**
-     * @param {?} providers
-     * @return {?}
-     */
-    ConfigService.prototype.updateProviders = /**
-     * @param {?} providers
-     * @return {?}
-     */
-    function (providers) {
-        this.options.providers = __assign({}, (this.options.providers || {}), providers);
+    ConfigService.prototype.updateProviders = function (providers) {
+        this.options.providers = __assign(__assign({}, (this.options.providers || {})), providers);
         this.mergeWithDefaultProviders();
     };
-    /**
-     * @return {?}
-     */
-    ConfigService.prototype.mergeWithDefaultProviders = /**
-     * @return {?}
-     */
-    function () {
+    ConfigService.prototype.mergeWithDefaultProviders = function () {
         var _this = this;
-        Object.keys(this.options.providers).forEach((/**
-         * @param {?} key
-         * @return {?}
-         */
-        function (key) {
+        Object.keys(this.options.providers).forEach(function (key) {
             if (key in defaultProviders) {
-                _this.options.providers[key] = __assign({}, defaultProviders[key], _this.options.providers[key]);
+                _this.options.providers[key] = __assign(__assign({}, defaultProviders[key]), _this.options.providers[key]);
             }
-        }));
+        });
     };
-    ConfigService.decorators = [
-        { type: Injectable }
-    ];
-    /** @nocollapse */
     ConfigService.ctorParameters = function () { return [
         { type: undefined, decorators: [{ type: Inject, args: [CONFIG_OPTIONS,] }] }
     ]; };
+    ConfigService = __decorate([
+        Injectable(),
+        __param(0, Inject(CONFIG_OPTIONS)),
+        __metadata("design:paramtypes", [Object])
+    ], ConfigService);
     return ConfigService;
 }());
 
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
- */
-/**
- * @abstract
- */
-var  /**
- * @abstract
- */
-StorageService = /** @class */ (function () {
+var StorageService = /** @class */ (function () {
     function StorageService() {
     }
     return StorageService;
 }());
 
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
- */
 var BrowserStorageService = /** @class */ (function (_super) {
     __extends(BrowserStorageService, _super);
     function BrowserStorageService(config) {
@@ -356,16 +272,7 @@ var BrowserStorageService = /** @class */ (function (_super) {
         }
         return _this;
     }
-    /**
-     * @param {?} storageType
-     * @return {?}
-     */
-    BrowserStorageService.prototype.updateStorageType = /**
-     * @param {?} storageType
-     * @return {?}
-     */
-    function (storageType) {
-        /** @type {?} */
+    BrowserStorageService.prototype.updateStorageType = function (storageType) {
         var isStorageAvailable = this.checkIsStorageAvailable(storageType);
         if (!isStorageAvailable) {
             return false;
@@ -373,15 +280,7 @@ var BrowserStorageService = /** @class */ (function (_super) {
         this.storageType = storageType;
         return true;
     };
-    /**
-     * @param {?} key
-     * @return {?}
-     */
-    BrowserStorageService.prototype.get = /**
-     * @param {?} key
-     * @return {?}
-     */
-    function (key) {
+    BrowserStorageService.prototype.get = function (key) {
         switch (this.storageType) {
             case StorageType.COOKIE:
             case StorageType.SESSION_COOKIE:
@@ -396,19 +295,7 @@ var BrowserStorageService = /** @class */ (function (_super) {
                 return null;
         }
     };
-    /**
-     * @param {?} key
-     * @param {?} value
-     * @param {?} date
-     * @return {?}
-     */
-    BrowserStorageService.prototype.set = /**
-     * @param {?} key
-     * @param {?} value
-     * @param {?} date
-     * @return {?}
-     */
-    function (key, value, date) {
+    BrowserStorageService.prototype.set = function (key, value, date) {
         switch (this.storageType) {
             case StorageType.COOKIE:
             case StorageType.SESSION_COOKIE:
@@ -426,15 +313,7 @@ var BrowserStorageService = /** @class */ (function (_super) {
                 break;
         }
     };
-    /**
-     * @param {?} key
-     * @return {?}
-     */
-    BrowserStorageService.prototype.remove = /**
-     * @param {?} key
-     * @return {?}
-     */
-    function (key) {
+    BrowserStorageService.prototype.remove = function (key) {
         switch (this.storageType) {
             case StorageType.COOKIE:
             case StorageType.SESSION_COOKIE:
@@ -452,17 +331,7 @@ var BrowserStorageService = /** @class */ (function (_super) {
                 break;
         }
     };
-    /**
-     * @private
-     * @param {?} storageType
-     * @return {?}
-     */
-    BrowserStorageService.prototype.checkIsStorageAvailable = /**
-     * @private
-     * @param {?} storageType
-     * @return {?}
-     */
-    function (storageType) {
+    BrowserStorageService.prototype.checkIsStorageAvailable = function (storageType) {
         switch (storageType) {
             case StorageType.COOKIE:
             case StorageType.SESSION_COOKIE:
@@ -477,22 +346,10 @@ var BrowserStorageService = /** @class */ (function (_super) {
                 return false;
         }
     };
-    /**
-     * @private
-     * @param {?} storageType
-     * @return {?}
-     */
-    BrowserStorageService.prototype.isWindowStorageAvailable = /**
-     * @private
-     * @param {?} storageType
-     * @return {?}
-     */
-    function (storageType) {
+    BrowserStorageService.prototype.isWindowStorageAvailable = function (storageType) {
         try {
-            /** @type {?} */
             var supported = window && storageType in window && window[storageType] !== null;
             if (supported) {
-                /** @type {?} */
                 var key = Math.random()
                     .toString(36)
                     .substring(7);
@@ -505,25 +362,14 @@ var BrowserStorageService = /** @class */ (function (_super) {
             return false;
         }
     };
-    /**
-     * @private
-     * @return {?}
-     */
-    BrowserStorageService.prototype.isCookieStorageAvailable = /**
-     * @private
-     * @return {?}
-     */
-    function () {
+    BrowserStorageService.prototype.isCookieStorageAvailable = function () {
         try {
-            /** @type {?} */
             var supported = document && 'cookie' in document;
             if (supported) {
-                /** @type {?} */
                 var key = Math.random()
                     .toString(36)
                     .substring(7);
                 this.setCookie(key, 'test', new Date(Date.now() + 60 * 1000).toUTCString());
-                /** @type {?} */
                 var value = this.getCookie(key);
                 this.removeCookie(key);
                 return value === 'test';
@@ -534,70 +380,28 @@ var BrowserStorageService = /** @class */ (function (_super) {
             return false;
         }
     };
-    /**
-     * @private
-     * @param {?} key
-     * @param {?} value
-     * @param {?=} expires
-     * @param {?=} path
-     * @return {?}
-     */
-    BrowserStorageService.prototype.setCookie = /**
-     * @private
-     * @param {?} key
-     * @param {?} value
-     * @param {?=} expires
-     * @param {?=} path
-     * @return {?}
-     */
-    function (key, value, expires, path) {
+    BrowserStorageService.prototype.setCookie = function (key, value, expires, path) {
         if (expires === void 0) { expires = ''; }
         if (path === void 0) { path = '/'; }
         document.cookie = key + "=" + value + (expires ? "; expires=" + expires : '') + "; path=" + path;
     };
-    /**
-     * @private
-     * @param {?} key
-     * @param {?=} path
-     * @return {?}
-     */
-    BrowserStorageService.prototype.removeCookie = /**
-     * @private
-     * @param {?} key
-     * @param {?=} path
-     * @return {?}
-     */
-    function (key, path) {
+    BrowserStorageService.prototype.removeCookie = function (key, path) {
         if (path === void 0) { path = '/'; }
         this.setCookie(key, '', new Date(0).toUTCString(), path);
     };
-    /**
-     * @private
-     * @param {?} key
-     * @return {?}
-     */
-    BrowserStorageService.prototype.getCookie = /**
-     * @private
-     * @param {?} key
-     * @return {?}
-     */
-    function (key) {
+    BrowserStorageService.prototype.getCookie = function (key) {
         return document.cookie.replace(new RegExp("(?:(?:^|.*;\\s*)" + key + "\\s*\\=\\s*([^;]*).*$)|^.*$"), '$1');
     };
-    BrowserStorageService.decorators = [
-        { type: Injectable }
-    ];
-    /** @nocollapse */
     BrowserStorageService.ctorParameters = function () { return [
         { type: ConfigService }
     ]; };
+    BrowserStorageService = __decorate([
+        Injectable(),
+        __metadata("design:paramtypes", [ConfigService])
+    ], BrowserStorageService);
     return BrowserStorageService;
 }(StorageService));
 
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
- */
 var SharedService = /** @class */ (function () {
     function SharedService(storage, config) {
         this.storage = storage;
@@ -606,30 +410,14 @@ var SharedService = /** @class */ (function () {
             ? [this.config.options.tokenPrefix, this.config.options.tokenName].join(this.config.options.tokenSeparator)
             : this.config.options.tokenName;
     }
-    /**
-     * @return {?}
-     */
-    SharedService.prototype.getToken = /**
-     * @return {?}
-     */
-    function () {
+    SharedService.prototype.getToken = function () {
         return this.storage.get(this.tokenName);
     };
-    /**
-     * @param {?=} token
-     * @return {?}
-     */
-    SharedService.prototype.getPayload = /**
-     * @param {?=} token
-     * @return {?}
-     */
-    function (token) {
+    SharedService.prototype.getPayload = function (token) {
         if (token === void 0) { token = this.getToken(); }
         if (token && token.split('.').length === 3) {
             try {
-                /** @type {?} */
                 var base64Url = token.split('.')[1];
-                /** @type {?} */
                 var base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
                 return JSON.parse(this.b64DecodeUnicode(base64));
             }
@@ -638,20 +426,11 @@ var SharedService = /** @class */ (function () {
             }
         }
     };
-    /**
-     * @param {?} response
-     * @return {?}
-     */
-    SharedService.prototype.setToken = /**
-     * @param {?} response
-     * @return {?}
-     */
-    function (response) {
+    SharedService.prototype.setToken = function (response) {
         if (!response) {
             // console.warn('Can\'t set token without passing a value');
             return;
         }
-        /** @type {?} */
         var token;
         if (typeof response === 'string') {
             token = response;
@@ -660,29 +439,14 @@ var SharedService = /** @class */ (function () {
             token = this.config.options.resolveToken(response, this.config.options);
         }
         if (token) {
-            /** @type {?} */
             var expDate = this.getExpirationDate(token);
             this.storage.set(this.tokenName, token, expDate ? expDate.toUTCString() : '');
         }
     };
-    /**
-     * @return {?}
-     */
-    SharedService.prototype.removeToken = /**
-     * @return {?}
-     */
-    function () {
+    SharedService.prototype.removeToken = function () {
         this.storage.remove(this.tokenName);
     };
-    /**
-     * @param {?=} token
-     * @return {?}
-     */
-    SharedService.prototype.isAuthenticated = /**
-     * @param {?=} token
-     * @return {?}
-     */
-    function (token) {
+    SharedService.prototype.isAuthenticated = function (token) {
         if (token === void 0) { token = this.getToken(); }
         // a token is present
         if (token) {
@@ -690,15 +454,11 @@ var SharedService = /** @class */ (function () {
             if (token.split('.').length === 3) {
                 // could be a valid JWT or an access token with the same format
                 try {
-                    /** @type {?} */
                     var base64Url = token.split('.')[1];
-                    /** @type {?} */
                     var base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-                    /** @type {?} */
                     var exp = JSON.parse(this.b64DecodeUnicode(base64)).exp;
                     // jwt with an optional expiration claims
                     if (exp) {
-                        /** @type {?} */
                         var isExpired = Math.round(new Date().getTime() / 1000) >= exp;
                         if (isExpired) {
                             // fail: Expired token
@@ -722,150 +482,72 @@ var SharedService = /** @class */ (function () {
         // lail: No token at all
         return false;
     };
-    /**
-     * @param {?=} token
-     * @return {?}
-     */
-    SharedService.prototype.getExpirationDate = /**
-     * @param {?=} token
-     * @return {?}
-     */
-    function (token) {
+    SharedService.prototype.getExpirationDate = function (token) {
         if (token === void 0) { token = this.getToken(); }
-        /** @type {?} */
         var payload = this.getPayload(token);
         if (payload && payload.exp && Math.round(new Date().getTime() / 1000) < payload.exp) {
-            /** @type {?} */
             var date = new Date(0);
             date.setUTCSeconds(payload.exp);
             return date;
         }
         return null;
     };
-    /**
-     * @return {?}
-     */
-    SharedService.prototype.logout = /**
-     * @return {?}
-     */
-    function () {
+    SharedService.prototype.logout = function () {
         var _this = this;
-        return Observable.create((/**
-         * @param {?} observer
-         * @return {?}
-         */
-        function (observer) {
+        return Observable.create(function (observer) {
             _this.storage.remove(_this.tokenName);
             observer.next();
             observer.complete();
-        }));
+        });
     };
-    /**
-     * @param {?} type
-     * @return {?}
-     */
-    SharedService.prototype.setStorageType = /**
-     * @param {?} type
-     * @return {?}
-     */
-    function (type) {
+    SharedService.prototype.setStorageType = function (type) {
         return this.storage.updateStorageType(type);
     };
-    /**
-     * @private
-     * @param {?} str
-     * @return {?}
-     */
-    SharedService.prototype.b64DecodeUnicode = /**
-     * @private
-     * @param {?} str
-     * @return {?}
-     */
-    function (str) {
-        return decodeURIComponent(Array.prototype.map.call(atob(str), (/**
-         * @param {?} c
-         * @return {?}
-         */
-        function (c) { return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2); })).join(''));
+    SharedService.prototype.b64DecodeUnicode = function (str) {
+        return decodeURIComponent(Array.prototype.map.call(atob(str), function (c) { return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2); }).join(''));
     };
-    SharedService.decorators = [
-        { type: Injectable }
-    ];
-    /** @nocollapse */
     SharedService.ctorParameters = function () { return [
         { type: StorageService },
         { type: ConfigService }
     ]; };
+    SharedService = __decorate([
+        Injectable(),
+        __metadata("design:paramtypes", [StorageService, ConfigService])
+    ], SharedService);
     return SharedService;
 }());
 
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
- */
 var JwtInterceptor = /** @class */ (function () {
     function JwtInterceptor(shared, config) {
         this.shared = shared;
         this.config = config;
     }
-    /**
-     * @param {?} req
-     * @param {?} next
-     * @return {?}
-     */
-    JwtInterceptor.prototype.intercept = /**
-     * @param {?} req
-     * @param {?} next
-     * @return {?}
-     */
-    function (req, next) {
+    JwtInterceptor.prototype.intercept = function (req, next) {
         var _a;
         var _b = this.config.options, authHeader = _b.authHeader, authToken = _b.authToken;
-        /** @type {?} */
         var token = this.shared.getToken();
-        /** @type {?} */
         var isAuthenticated = this.shared.isAuthenticated();
-        /** @type {?} */
         var newReq = isAuthenticated && !req.headers.has(authHeader) ? req.clone({ setHeaders: (_a = {}, _a[authHeader] = authToken + " " + token, _a) }) : req;
         return next.handle(newReq);
     };
-    JwtInterceptor.decorators = [
-        { type: Injectable }
-    ];
-    /** @nocollapse */
     JwtInterceptor.ctorParameters = function () { return [
         { type: SharedService },
         { type: ConfigService }
     ]; };
+    JwtInterceptor = __decorate([
+        Injectable(),
+        __metadata("design:paramtypes", [SharedService, ConfigService])
+    ], JwtInterceptor);
     return JwtInterceptor;
 }());
 
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
- */
 var PopupService = /** @class */ (function () {
     function PopupService() {
     }
-    /**
-     * @param {?} url
-     * @param {?} options
-     * @param {?=} cordova
-     * @return {?}
-     */
-    PopupService.prototype.open = /**
-     * @param {?} url
-     * @param {?} options
-     * @param {?=} cordova
-     * @return {?}
-     */
-    function (url, options, cordova) {
+    PopupService.prototype.open = function (url, options, cordova) {
         if (cordova === void 0) { cordova = this.isCordovaApp(); }
-        /** @type {?} */
         var stringifiedOptions = this.stringifyOptions(this.prepareOptions(options.popupOptions));
-        /** @type {?} */
         var windowName = cordova ? '_blank' : options.name;
-        /** @type {?} */
         var popupWindow = typeof window !== 'undefined' ? window.open(url, windowName, stringifiedOptions) : null;
         if (popupWindow) {
             if (popupWindow.focus) {
@@ -875,71 +557,34 @@ var PopupService = /** @class */ (function () {
         }
         return empty();
     };
-    /**
-     * @param {?} popupWindow
-     * @param {?=} cordova
-     * @param {?=} redirectUri
-     * @return {?}
-     */
-    PopupService.prototype.waitForClose = /**
-     * @param {?} popupWindow
-     * @param {?=} cordova
-     * @param {?=} redirectUri
-     * @return {?}
-     */
-    function (popupWindow, cordova, redirectUri) {
+    PopupService.prototype.waitForClose = function (popupWindow, cordova, redirectUri) {
         if (cordova === void 0) { cordova = this.isCordovaApp(); }
         if (redirectUri === void 0) { redirectUri = getWindowOrigin(); }
         return cordova ? this.eventListener(popupWindow, redirectUri) : this.pollPopup(popupWindow, redirectUri);
     };
-    /**
-     * @private
-     * @param {?} popupWindow
-     * @param {?=} redirectUri
-     * @return {?}
-     */
-    PopupService.prototype.eventListener = /**
-     * @private
-     * @param {?} popupWindow
-     * @param {?=} redirectUri
-     * @return {?}
-     */
-    function (popupWindow, redirectUri) {
+    PopupService.prototype.eventListener = function (popupWindow, redirectUri) {
         var _this = this;
         if (redirectUri === void 0) { redirectUri = getWindowOrigin(); }
         if (!popupWindow) {
             throw new Error('Popup was not created');
         }
-        return merge(fromEvent(popupWindow, 'exit').pipe(delay(100), map((/**
-         * @return {?}
-         */
-        function () {
+        return merge(fromEvent(popupWindow, 'exit').pipe(delay(100), map(function () {
             throw new Error('Authentication Canceled');
-        }))), fromEvent(popupWindow, 'loadstart')).pipe(switchMap((/**
-         * @param {?} event
-         * @return {?}
-         */
-        function (event) {
+        })), fromEvent(popupWindow, 'loadstart')).pipe(switchMap(function (event) {
             if (!popupWindow || popupWindow.closed) {
                 return Observable.throw(new Error('Authentication Canceled'));
             }
             if (event.url.indexOf(redirectUri) !== 0) {
                 return empty();
             }
-            /** @type {?} */
             var parser = document.createElement('a');
             parser.href = event.url;
             if (parser.search || parser.hash) {
-                /** @type {?} */
                 var queryParams = parser.search.substring(1).replace(/\/$/, '');
-                /** @type {?} */
                 var hashParams = parser.hash.substring(1).replace(/\/$/, '');
-                /** @type {?} */
                 var hash = _this.parseQueryString(hashParams);
-                /** @type {?} */
                 var qs = _this.parseQueryString(queryParams);
-                /** @type {?} */
-                var allParams = __assign({}, qs, hash);
+                var allParams = __assign(__assign({}, qs), hash);
                 popupWindow.close();
                 if (allParams.error) {
                     throw allParams.error;
@@ -949,46 +594,25 @@ var PopupService = /** @class */ (function () {
                 }
             }
             return empty();
-        })), take(1));
+        }), take(1));
     };
-    /**
-     * @private
-     * @param {?} popupWindow
-     * @param {?=} redirectUri
-     * @return {?}
-     */
-    PopupService.prototype.pollPopup = /**
-     * @private
-     * @param {?} popupWindow
-     * @param {?=} redirectUri
-     * @return {?}
-     */
-    function (popupWindow, redirectUri) {
+    PopupService.prototype.pollPopup = function (popupWindow, redirectUri) {
         var _this = this;
         if (redirectUri === void 0) { redirectUri = getWindowOrigin(); }
-        return interval(50).pipe(switchMap((/**
-         * @return {?}
-         */
-        function () {
+        return interval(50).pipe(switchMap(function () {
             if (!popupWindow || popupWindow.closed) {
                 return throwError(new Error('Authentication Canceled'));
             }
-            /** @type {?} */
             var popupWindowOrigin = getWindowOrigin(popupWindow);
             if (popupWindowOrigin &&
                 (redirectUri.indexOf(popupWindowOrigin) === 0 || popupWindowOrigin.indexOf(redirectUri) === 0) &&
                 (popupWindow.location.search || popupWindow.location.hash)) {
-                /** @type {?} */
                 var queryParams = popupWindow.location.search.substring(1).replace(/\/$/, '');
-                /** @type {?} */
                 var hashParams = popupWindow.location.hash.substring(1).replace(/[\/$]/, '');
-                /** @type {?} */
                 var hash = _this.parseQueryString(hashParams);
-                /** @type {?} */
                 var qs = _this.parseQueryString(queryParams);
                 popupWindow.close();
-                /** @type {?} */
-                var allParams = __assign({}, qs, hash);
+                var allParams = __assign(__assign({}, qs), hash);
                 if (allParams.error) {
                     throw allParams.error;
                 }
@@ -997,231 +621,97 @@ var PopupService = /** @class */ (function () {
                 }
             }
             return empty();
-        })), take(1));
+        }), take(1));
     };
-    /**
-     * @private
-     * @param {?=} options
-     * @return {?}
-     */
-    PopupService.prototype.prepareOptions = /**
-     * @private
-     * @param {?=} options
-     * @return {?}
-     */
-    function (options) {
+    PopupService.prototype.prepareOptions = function (options) {
         options = options || {};
-        /** @type {?} */
         var width = options.width || 500;
-        /** @type {?} */
         var height = options.height || 500;
         return __assign({ width: width,
             height: height, left: window.screenX + (window.outerWidth - width) / 2, top: window.screenY + (window.outerHeight - height) / 2.5, toolbar: options.visibleToolbar ? 'yes' : 'no' }, options);
     };
-    /**
-     * @private
-     * @param {?} options
-     * @return {?}
-     */
-    PopupService.prototype.stringifyOptions = /**
-     * @private
-     * @param {?} options
-     * @return {?}
-     */
-    function (options) {
+    PopupService.prototype.stringifyOptions = function (options) {
         return Object.keys(options)
-            .map((/**
-         * @param {?} key
-         * @return {?}
-         */
-        function (key) { return (options[key] === null || options[key] === undefined ? key : key + '=' + options[key]); }))
+            .map(function (key) { return (options[key] === null || options[key] === undefined ? key : key + '=' + options[key]); })
             .join(',');
     };
-    /**
-     * @private
-     * @param {?} joinedKeyValue
-     * @return {?}
-     */
-    PopupService.prototype.parseQueryString = /**
-     * @private
-     * @param {?} joinedKeyValue
-     * @return {?}
-     */
-    function (joinedKeyValue) {
-        /** @type {?} */
+    PopupService.prototype.parseQueryString = function (joinedKeyValue) {
         var key;
-        /** @type {?} */
         var value;
-        return joinedKeyValue.split('&').reduce((/**
-         * @param {?} obj
-         * @param {?} keyValue
-         * @return {?}
-         */
-        function (obj, keyValue) {
+        return joinedKeyValue.split('&').reduce(function (obj, keyValue) {
             if (keyValue) {
                 value = keyValue.split('=');
                 key = decodeURIComponent(value[0]);
                 obj[key] = typeof value[1] !== 'undefined' ? decodeURIComponent(value[1]) : true;
             }
             return obj;
-        }), (/** @type {?} */ ({})));
+        }, {});
     };
-    /**
-     * @private
-     * @return {?}
-     */
-    PopupService.prototype.isCordovaApp = /**
-     * @private
-     * @return {?}
-     */
-    function () {
+    PopupService.prototype.isCordovaApp = function () {
         return typeof cordova === 'object' || (document.URL.indexOf('http://') === -1 && document.URL.indexOf('https://') === -1);
     };
-    PopupService.decorators = [
-        { type: Injectable }
-    ];
+    PopupService = __decorate([
+        Injectable()
+    ], PopupService);
     return PopupService;
 }());
 
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
- */
 var Oauth1Service = /** @class */ (function () {
     function Oauth1Service(http, popup, config) {
         this.http = http;
         this.popup = popup;
         this.config = config;
     }
-    /**
-     * @template T
-     * @param {?} oauthOptions
-     * @param {?} userData
-     * @return {?}
-     */
-    Oauth1Service.prototype.open = /**
-     * @template T
-     * @param {?} oauthOptions
-     * @param {?} userData
-     * @return {?}
-     */
-    function (oauthOptions, userData) {
+    Oauth1Service.prototype.open = function (oauthOptions, userData) {
         var _this = this;
-        /** @type {?} */
         var serverUrl = this.config.options.baseUrl ? joinUrl(this.config.options.baseUrl, oauthOptions.url) : oauthOptions.url;
-        return this.popup.open('about:blank', oauthOptions, this.config.options.cordova).pipe(switchMap((/**
-         * @param {?} popupWindow
-         * @return {?}
-         */
-        function (popupWindow) {
-            return _this.http.post(serverUrl, oauthOptions).pipe(tap((/**
-             * @param {?} authorizationData
-             * @return {?}
-             */
-            function (authorizationData) {
+        return this.popup.open('about:blank', oauthOptions, this.config.options.cordova).pipe(switchMap(function (popupWindow) {
+            return _this.http.post(serverUrl, oauthOptions).pipe(tap(function (authorizationData) {
                 return popupWindow
                     ? popupWindow.location.replace([oauthOptions.authorizationEndpoint, buildQueryString(authorizationData)].join('?'))
                     : undefined;
-            })), switchMap((/**
-             * @param {?} authorizationData
-             * @return {?}
-             */
-            function (authorizationData) {
+            }), switchMap(function (authorizationData) {
                 return _this.popup
                     .waitForClose(popupWindow, _this.config.options.cordova, oauthOptions.redirectUri)
-                    .pipe(map((/**
-                 * @param {?} oauthData
-                 * @return {?}
-                 */
-                function (oauthData) { return ({ authorizationData: authorizationData, oauthData: oauthData }); })));
-            })));
-        })), switchMap((/**
-         * @param {?} __0
-         * @return {?}
-         */
-        function (_a) {
+                    .pipe(map(function (oauthData) { return ({ authorizationData: authorizationData, oauthData: oauthData }); }));
+            }));
+        }), switchMap(function (_a) {
             var authorizationData = _a.authorizationData, oauthData = _a.oauthData;
             return _this.exchangeForToken(oauthOptions, authorizationData, oauthData, userData);
-        })));
+        }));
     };
-    /**
-     * @private
-     * @template T
-     * @param {?} oauthOptions
-     * @param {?} authorizationData
-     * @param {?} oauthData
-     * @param {?} userData
-     * @return {?}
-     */
-    Oauth1Service.prototype.exchangeForToken = /**
-     * @private
-     * @template T
-     * @param {?} oauthOptions
-     * @param {?} authorizationData
-     * @param {?} oauthData
-     * @param {?} userData
-     * @return {?}
-     */
-    function (oauthOptions, authorizationData, oauthData, userData) {
-        /** @type {?} */
+    Oauth1Service.prototype.exchangeForToken = function (oauthOptions, authorizationData, oauthData, userData) {
         var body = { oauthOptions: oauthOptions, authorizationData: authorizationData, oauthData: oauthData, userData: userData };
         var _a = this.config.options, withCredentials = _a.withCredentials, baseUrl = _a.baseUrl;
         var _b = oauthOptions.method, method = _b === void 0 ? 'POST' : _b, url = oauthOptions.url;
-        /** @type {?} */
         var exchangeForTokenUrl = baseUrl ? joinUrl(baseUrl, url) : url;
         return this.http.request(method, exchangeForTokenUrl, { body: body, withCredentials: withCredentials });
     };
-    Oauth1Service.decorators = [
-        { type: Injectable }
-    ];
-    /** @nocollapse */
     Oauth1Service.ctorParameters = function () { return [
         { type: HttpClient },
         { type: PopupService },
         { type: ConfigService }
     ]; };
+    Oauth1Service = __decorate([
+        Injectable(),
+        __metadata("design:paramtypes", [HttpClient, PopupService, ConfigService])
+    ], Oauth1Service);
     return Oauth1Service;
 }());
 
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
- */
 var Oauth2Service = /** @class */ (function () {
     function Oauth2Service(http, popup, config) {
         this.http = http;
         this.popup = popup;
         this.config = config;
     }
-    /**
-     * @template T
-     * @param {?} oauthOptions
-     * @param {?} userData
-     * @return {?}
-     */
-    Oauth2Service.prototype.open = /**
-     * @template T
-     * @param {?} oauthOptions
-     * @param {?} userData
-     * @return {?}
-     */
-    function (oauthOptions, userData) {
+    Oauth2Service.prototype.open = function (oauthOptions, userData) {
         var _this = this;
-        /** @type {?} */
         var authorizationData = this.getAuthorizationData(oauthOptions);
-        /** @type {?} */
         var url = [oauthOptions.authorizationEndpoint, buildQueryString(authorizationData)].join('?');
-        return this.popup.open(url, oauthOptions, this.config.options.cordova).pipe(switchMap((/**
-         * @param {?=} window
-         * @return {?}
-         */
-        function (window) {
+        return this.popup.open(url, oauthOptions, this.config.options.cordova).pipe(switchMap(function (window) {
             return window ? _this.popup.waitForClose(window, _this.config.options.cordova, oauthOptions.redirectUri) : empty();
-        })), switchMap((/**
-         * @param {?} oauthData
-         * @return {?}
-         */
-        function (oauthData) {
+        }), switchMap(function (oauthData) {
             // when no server URL provided, return popup params as-is.
             // this is for a scenario when someone wishes to opt out from
             // satellizer's magic by doing authorization code exchange and
@@ -1233,61 +723,25 @@ var Oauth2Service = /** @class */ (function () {
                 throw new Error('OAuth "state" mismatch');
             }
             return _this.exchangeForToken(oauthOptions, authorizationData, oauthData, userData);
-        })));
+        }));
     };
-    /**
-     * @private
-     * @template T
-     * @param {?} options
-     * @param {?} authorizationData
-     * @param {?} oauthData
-     * @param {?} userData
-     * @return {?}
-     */
-    Oauth2Service.prototype.exchangeForToken = /**
-     * @private
-     * @template T
-     * @param {?} options
-     * @param {?} authorizationData
-     * @param {?} oauthData
-     * @param {?} userData
-     * @return {?}
-     */
-    function (options, authorizationData, oauthData, userData) {
-        /** @type {?} */
+    Oauth2Service.prototype.exchangeForToken = function (options, authorizationData, oauthData, userData) {
         var body = { authorizationData: authorizationData, oauthData: oauthData, userData: userData };
         var _a = this.config.options, baseUrl = _a.baseUrl, withCredentials = _a.withCredentials;
         var url = options.url, _b = options.method, method = _b === void 0 ? 'POST' : _b;
-        /** @type {?} */
         var exchangeForTokenUrl = baseUrl ? joinUrl(baseUrl, url) : url;
         return this.http.request(method, exchangeForTokenUrl, { body: body, withCredentials: withCredentials });
     };
-    /**
-     * @private
-     * @param {?} options
-     * @return {?}
-     */
-    Oauth2Service.prototype.getAuthorizationData = /**
-     * @private
-     * @param {?} options
-     * @return {?}
-     */
-    function (options) {
+    Oauth2Service.prototype.getAuthorizationData = function (options) {
         var _a = options.responseType, responseType = _a === void 0 ? 'code' : _a, clientId = options.clientId, _b = options.redirectUri, redirectUri = _b === void 0 ? getWindowOrigin() || '' : _b, _c = options.scopeDelimiter, scopeDelimiter = _c === void 0 ? ',' : _c, scope = options.scope, state = options.state, additionalUrlParams = options.additionalUrlParams;
-        /** @type {?} */
         var resolvedState = typeof state === 'function' ? state() : state;
         return __spread([
             ['response_type', responseType],
             ['client_id', clientId],
             ['redirect_uri', redirectUri]
         ], (state ? [['state', resolvedState]] : []), (scope ? [['scope', scope.join(scopeDelimiter)]] : []), (additionalUrlParams
-            ? Object.keys(additionalUrlParams).map((/**
-             * @param {?} key
-             * @return {?}
-             */
-            function (key) {
-                /** @type {?} */
-                var value = ((/** @type {?} */ (additionalUrlParams)))[key];
+            ? Object.keys(additionalUrlParams).map(function (key) {
+                var value = additionalUrlParams[key];
                 if (typeof value === 'string') {
                     return [key, value];
                 }
@@ -1298,38 +752,25 @@ var Oauth2Service = /** @class */ (function () {
                     return [key, ''];
                 }
                 return ['', ''];
-            }))
-            : [])).filter((/**
-         * @param {?} _
-         * @return {?}
-         */
-        function (_) { return !!_[0]; }))
-            .reduce((/**
-         * @param {?} acc
-         * @param {?} next
-         * @return {?}
-         */
-        function (acc, next) {
+            })
+            : [])).filter(function (_) { return !!_[0]; })
+            .reduce(function (acc, next) {
             var _a;
-            return (__assign({}, acc, (_a = {}, _a[next[0]] = next[1], _a)));
-        }), (/** @type {?} */ ({})));
+            return (__assign(__assign({}, acc), (_a = {}, _a[next[0]] = next[1], _a)));
+        }, {});
     };
-    Oauth2Service.decorators = [
-        { type: Injectable }
-    ];
-    /** @nocollapse */
     Oauth2Service.ctorParameters = function () { return [
         { type: HttpClient },
         { type: PopupService },
         { type: ConfigService }
     ]; };
+    Oauth2Service = __decorate([
+        Injectable(),
+        __metadata("design:paramtypes", [HttpClient, PopupService, ConfigService])
+    ], Oauth2Service);
     return Oauth2Service;
 }());
 
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
- */
 var OauthService = /** @class */ (function () {
     function OauthService(http, shared, config, popup) {
         this.http = http;
@@ -1343,322 +784,130 @@ var OauthService = /** @class */ (function () {
         ];
         this.deps = [HttpClient, PopupService, ConfigService];
     }
-    /**
-     * @template T
-     * @param {?} name
-     * @param {?=} userData
-     * @return {?}
-     */
-    OauthService.prototype.authenticate = /**
-     * @template T
-     * @param {?} name
-     * @param {?=} userData
-     * @return {?}
-     */
-    function (name, userData) {
+    OauthService.prototype.authenticate = function (name, userData) {
         var _this = this;
-        /** @type {?} */
         var provider = this.config.options.providers[name].oauthType === '1.0'
             ? Injector.create(__spread(this.depProviders, [{ provide: Oauth1Service, deps: this.deps }])).get(Oauth1Service)
             : Injector.create(__spread(this.depProviders, [{ provide: Oauth2Service, deps: this.deps }])).get(Oauth2Service);
-        return provider.open(this.config.options.providers[name], userData || {}).pipe(tap((/**
-         * @param {?} response
-         * @return {?}
-         */
-        function (response) {
+        return provider.open(this.config.options.providers[name], userData || {}).pipe(tap(function (response) {
             // this is for a scenario when someone wishes to opt out from
             // satellizer's magic by doing authorization code exchange and
             // saving a token manually.
             if (_this.config.options.providers[name].url) {
                 _this.shared.setToken(response);
             }
-        })));
+        }));
     };
-    /**
-     * @template T
-     * @param {?} provider
-     * @param {?=} url
-     * @param {?=} method
-     * @return {?}
-     */
-    OauthService.prototype.unlink = /**
-     * @template T
-     * @param {?} provider
-     * @param {?=} url
-     * @param {?=} method
-     * @return {?}
-     */
-    function (provider, url, method) {
+    OauthService.prototype.unlink = function (provider, url, method) {
         if (url === void 0) { url = joinUrl(this.config.options.baseUrl, this.config.options.unlinkUrl); }
         if (method === void 0) { method = 'POST'; }
         return this.http.request(method, url, { body: { provider: provider } });
     };
-    OauthService.decorators = [
-        { type: Injectable }
-    ];
-    /** @nocollapse */
     OauthService.ctorParameters = function () { return [
         { type: HttpClient },
         { type: SharedService },
         { type: ConfigService },
         { type: PopupService }
     ]; };
+    OauthService = __decorate([
+        Injectable(),
+        __metadata("design:paramtypes", [HttpClient, SharedService, ConfigService, PopupService])
+    ], OauthService);
     return OauthService;
 }());
 
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
- */
 var LocalService = /** @class */ (function () {
     function LocalService(http, shared, config) {
         this.http = http;
         this.shared = shared;
         this.config = config;
     }
-    /**
-     * @template T
-     * @param {?} user
-     * @param {?=} url
-     * @return {?}
-     */
-    LocalService.prototype.login = /**
-     * @template T
-     * @param {?} user
-     * @param {?=} url
-     * @return {?}
-     */
-    function (user, url) {
+    LocalService.prototype.login = function (user, url) {
         var _this = this;
         return this.http
             .post(url || joinUrl(this.config.options.baseUrl, this.config.options.loginUrl), user)
-            .pipe(tap((/**
-         * @param {?} data
-         * @return {?}
-         */
-        function (data) { return _this.shared.setToken(data); })));
+            .pipe(tap(function (data) { return _this.shared.setToken(data); }));
     };
-    /**
-     * @template T
-     * @param {?} user
-     * @param {?=} url
-     * @return {?}
-     */
-    LocalService.prototype.signup = /**
-     * @template T
-     * @param {?} user
-     * @param {?=} url
-     * @return {?}
-     */
-    function (user, url) {
+    LocalService.prototype.signup = function (user, url) {
         return this.http.post(url || joinUrl(this.config.options.baseUrl, this.config.options.signupUrl), user);
     };
-    LocalService.decorators = [
-        { type: Injectable }
-    ];
-    /** @nocollapse */
     LocalService.ctorParameters = function () { return [
         { type: HttpClient },
         { type: SharedService },
         { type: ConfigService }
     ]; };
+    LocalService = __decorate([
+        Injectable(),
+        __metadata("design:paramtypes", [HttpClient, SharedService, ConfigService])
+    ], LocalService);
     return LocalService;
 }());
 
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
- */
 var AuthService = /** @class */ (function () {
     function AuthService(shared, local, oauth) {
         this.shared = shared;
         this.local = local;
         this.oauth = oauth;
     }
-    /**
-     * @template T
-     * @param {?} user
-     * @param {?=} url
-     * @return {?}
-     */
-    AuthService.prototype.login = /**
-     * @template T
-     * @param {?} user
-     * @param {?=} url
-     * @return {?}
-     */
-    function (user, url) {
+    AuthService.prototype.login = function (user, url) {
         return this.local.login(user, url);
     };
-    /**
-     * @template T
-     * @param {?} user
-     * @param {?=} url
-     * @return {?}
-     */
-    AuthService.prototype.signup = /**
-     * @template T
-     * @param {?} user
-     * @param {?=} url
-     * @return {?}
-     */
-    function (user, url) {
+    AuthService.prototype.signup = function (user, url) {
         return this.local.signup(user, url);
     };
-    /**
-     * @return {?}
-     */
-    AuthService.prototype.logout = /**
-     * @return {?}
-     */
-    function () {
+    AuthService.prototype.logout = function () {
         return this.shared.logout();
     };
-    /**
-     * @template T
-     * @param {?} name
-     * @param {?=} userData
-     * @return {?}
-     */
-    AuthService.prototype.authenticate = /**
-     * @template T
-     * @param {?} name
-     * @param {?=} userData
-     * @return {?}
-     */
-    function (name, userData) {
+    AuthService.prototype.authenticate = function (name, userData) {
         return this.oauth.authenticate(name, userData);
     };
-    /**
-     * @template T
-     * @param {?} name
-     * @param {?=} userData
-     * @return {?}
-     */
-    AuthService.prototype.link = /**
-     * @template T
-     * @param {?} name
-     * @param {?=} userData
-     * @return {?}
-     */
-    function (name, userData) {
+    AuthService.prototype.link = function (name, userData) {
         return this.oauth.authenticate(name, userData);
     };
-    /**
-     * @template T
-     * @param {?} provider
-     * @param {?=} url
-     * @return {?}
-     */
-    AuthService.prototype.unlink = /**
-     * @template T
-     * @param {?} provider
-     * @param {?=} url
-     * @return {?}
-     */
-    function (provider, url) {
+    AuthService.prototype.unlink = function (provider, url) {
         return this.oauth.unlink(provider, url);
     };
-    /**
-     * @return {?}
-     */
-    AuthService.prototype.isAuthenticated = /**
-     * @return {?}
-     */
-    function () {
+    AuthService.prototype.isAuthenticated = function () {
         return this.shared.isAuthenticated();
     };
-    /**
-     * @return {?}
-     */
-    AuthService.prototype.getToken = /**
-     * @return {?}
-     */
-    function () {
+    AuthService.prototype.getToken = function () {
         return this.shared.getToken();
     };
-    /**
-     * @param {?} token
-     * @return {?}
-     */
-    AuthService.prototype.setToken = /**
-     * @param {?} token
-     * @return {?}
-     */
-    function (token) {
+    AuthService.prototype.setToken = function (token) {
         this.shared.setToken(token);
     };
-    /**
-     * @return {?}
-     */
-    AuthService.prototype.removeToken = /**
-     * @return {?}
-     */
-    function () {
+    AuthService.prototype.removeToken = function () {
         this.shared.removeToken();
     };
-    /**
-     * @return {?}
-     */
-    AuthService.prototype.getPayload = /**
-     * @return {?}
-     */
-    function () {
+    AuthService.prototype.getPayload = function () {
         return this.shared.getPayload();
     };
-    /**
-     * @param {?} type
-     * @return {?}
-     */
-    AuthService.prototype.setStorageType = /**
-     * @param {?} type
-     * @return {?}
-     */
-    function (type) {
+    AuthService.prototype.setStorageType = function (type) {
         return this.shared.setStorageType(type);
     };
-    /**
-     * @return {?}
-     */
-    AuthService.prototype.getExpirationDate = /**
-     * @return {?}
-     */
-    function () {
+    AuthService.prototype.getExpirationDate = function () {
         return this.shared.getExpirationDate();
     };
-    AuthService.decorators = [
-        { type: Injectable }
-    ];
-    /** @nocollapse */
     AuthService.ctorParameters = function () { return [
         { type: SharedService },
         { type: LocalService },
         { type: OauthService }
     ]; };
+    AuthService = __decorate([
+        Injectable(),
+        __metadata("design:paramtypes", [SharedService, LocalService, OauthService])
+    ], AuthService);
     return AuthService;
 }());
 
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes,constantProperty,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
- */
 var Ng2UiAuthModule = /** @class */ (function () {
     function Ng2UiAuthModule() {
     }
-    /**
-     * @param {?=} configOptions
-     * @param {?=} defaultJwtInterceptor
-     * @return {?}
-     */
-    Ng2UiAuthModule.forRoot = /**
-     * @param {?=} configOptions
-     * @param {?=} defaultJwtInterceptor
-     * @return {?}
-     */
-    function (configOptions, defaultJwtInterceptor) {
+    Ng2UiAuthModule_1 = Ng2UiAuthModule;
+    Ng2UiAuthModule.forRoot = function (configOptions, defaultJwtInterceptor) {
         if (defaultJwtInterceptor === void 0) { defaultJwtInterceptor = true; }
         return {
-            ngModule: Ng2UiAuthModule,
+            ngModule: Ng2UiAuthModule_1,
             providers: __spread((configOptions ? [{ provide: CONFIG_OPTIONS, useValue: configOptions }] : []), [
                 { provide: ConfigService, useClass: ConfigService, deps: [CONFIG_OPTIONS] },
                 { provide: StorageService, useClass: BrowserStorageService, deps: [ConfigService] },
@@ -1672,15 +921,20 @@ var Ng2UiAuthModule = /** @class */ (function () {
                 : []))
         };
     };
-    Ng2UiAuthModule.decorators = [
-        { type: NgModule, args: [{
-                    imports: [HttpClientModule],
-                    declarations: [],
-                    exports: []
-                },] }
-    ];
+    var Ng2UiAuthModule_1;
+    Ng2UiAuthModule = Ng2UiAuthModule_1 = __decorate([
+        NgModule({
+            imports: [HttpClientModule],
+            declarations: [],
+            exports: []
+        })
+    ], Ng2UiAuthModule);
     return Ng2UiAuthModule;
 }());
+
+/**
+ * Generated bundle index. Do not edit.
+ */
 
 export { AuthService, BrowserStorageService, CONFIG_OPTIONS, ConfigService, JwtInterceptor, LocalService, Ng2UiAuthModule, Oauth1Service, Oauth2Service, OauthService, PopupService, SharedService, StorageService, StorageType };
 //# sourceMappingURL=ng2-ui-auth.js.map
