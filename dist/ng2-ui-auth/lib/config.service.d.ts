@@ -1,7 +1,6 @@
 import { InjectionToken } from '@angular/core';
 import { IConfigOptions, IPartialConfigOptions, IProviders } from './config-interfaces';
 import { StorageType } from './storage-type.enum';
-import * as ɵngcc0 from '@angular/core';
 export declare const CONFIG_OPTIONS: InjectionToken<any>;
 export declare class ConfigService {
     options: {
@@ -24,8 +23,4 @@ export declare class ConfigService {
     constructor(options: IPartialConfigOptions);
     updateProviders(providers: IProviders): void;
     mergeWithDefaultProviders(): void;
-    static ɵfac: ɵngcc0.ɵɵFactoryDef<ConfigService, never>;
-    static ɵprov: ɵngcc0.ɵɵInjectableDef<ConfigService>;
 }
-
-//# sourceMappingURL=config.service.d.ts.map

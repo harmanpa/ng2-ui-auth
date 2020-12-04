@@ -1010,11 +1010,11 @@ RedirectDirective.propDecorators = {
 };
 
 class Ng2UiAuthModule {
-    static forRoot(configOptions, defaultJwtInterceptor = true) {
+    static forRoot(configOptions = {}, defaultJwtInterceptor = true) {
         return {
             ngModule: Ng2UiAuthModule,
             providers: [
-                ...(configOptions ? [{ provide: CONFIG_OPTIONS, useValue: configOptions }] : []),
+                { provide: CONFIG_OPTIONS, useValue: configOptions },
                 { provide: ConfigService, useClass: ConfigService, deps: [CONFIG_OPTIONS] },
                 { provide: StorageService, useClass: BrowserStorageService, deps: [ConfigService] },
                 { provide: SharedService, useClass: SharedService, deps: [StorageService, ConfigService] },
@@ -1022,6 +1022,7 @@ class Ng2UiAuthModule {
                 { provide: PopupService, useClass: PopupService, deps: [ConfigService] },
                 { provide: OauthService, useClass: OauthService, deps: [HttpClient, SharedService, ConfigService, PopupService] },
                 { provide: AuthService, useClass: AuthService, deps: [SharedService, LocalService, OauthService] },
+                { provide: RedirectService, useClass: RedirectService, deps: [AuthService, StorageService, OauthService, SharedService] },
                 ...(defaultJwtInterceptor
                     ? [{ provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true, deps: [SharedService, ConfigService] }]
                     : [])
@@ -1041,5 +1042,5 @@ Ng2UiAuthModule.decorators = [
  * Generated bundle index. Do not edit.
  */
 
-export { AuthService, BrowserStorageService, CONFIG_OPTIONS, ConfigService, JwtInterceptor, LocalService, Ng2UiAuthModule, Oauth1Service, Oauth2Service, OauthService, PopupService, SharedService, StorageService, StorageType, RedirectDirective as ɵb, RedirectService as ɵc };
+export { AuthService, BrowserStorageService, CONFIG_OPTIONS, ConfigService, JwtInterceptor, LocalService, Ng2UiAuthModule, Oauth1Service, Oauth2Service, OauthService, PopupService, RedirectDirective, SharedService, StorageService, StorageType, RedirectService as ɵb };
 //# sourceMappingURL=ng2-ui-auth.js.map

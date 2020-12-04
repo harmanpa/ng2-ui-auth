@@ -1357,17 +1357,20 @@
         function Ng2UiAuthModule() {
         }
         Ng2UiAuthModule.forRoot = function (configOptions, defaultJwtInterceptor) {
+            if (configOptions === void 0) { configOptions = {}; }
             if (defaultJwtInterceptor === void 0) { defaultJwtInterceptor = true; }
             return {
                 ngModule: Ng2UiAuthModule,
-                providers: __spread((configOptions ? [{ provide: CONFIG_OPTIONS, useValue: configOptions }] : []), [
+                providers: __spread([
+                    { provide: CONFIG_OPTIONS, useValue: configOptions },
                     { provide: ConfigService, useClass: ConfigService, deps: [CONFIG_OPTIONS] },
                     { provide: StorageService, useClass: BrowserStorageService, deps: [ConfigService] },
                     { provide: SharedService, useClass: SharedService, deps: [StorageService, ConfigService] },
                     { provide: LocalService, useClass: LocalService, deps: [http.HttpClient, SharedService, ConfigService] },
                     { provide: PopupService, useClass: PopupService, deps: [ConfigService] },
                     { provide: OauthService, useClass: OauthService, deps: [http.HttpClient, SharedService, ConfigService, PopupService] },
-                    { provide: AuthService, useClass: AuthService, deps: [SharedService, LocalService, OauthService] }
+                    { provide: AuthService, useClass: AuthService, deps: [SharedService, LocalService, OauthService] },
+                    { provide: RedirectService, useClass: RedirectService, deps: [AuthService, StorageService, OauthService, SharedService] }
                 ], (defaultJwtInterceptor
                     ? [{ provide: http.HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true, deps: [SharedService, ConfigService] }]
                     : []))
@@ -1398,10 +1401,10 @@
     exports.Oauth2Service = Oauth2Service;
     exports.OauthService = OauthService;
     exports.PopupService = PopupService;
+    exports.RedirectDirective = RedirectDirective;
     exports.SharedService = SharedService;
     exports.StorageService = StorageService;
-    exports.ɵb = RedirectDirective;
-    exports.ɵc = RedirectService;
+    exports.ɵb = RedirectService;
 
     Object.defineProperty(exports, '__esModule', { value: true });
 

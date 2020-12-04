@@ -12,4 +12,5 @@ import { ConfigService, CONFIG_OPTIONS } from './lib/config.service';
 import { JwtInterceptor } from './lib/interceptor.service';
 import { IProviders } from './lib/config-interfaces';
 import { StorageType } from './lib/storage-type.enum';
-export { Ng2UiAuthModule, LocalService, Oauth2Service, Oauth1Service, PopupService, OauthService, SharedService, StorageService, BrowserStorageService, AuthService, ConfigService, JwtInterceptor, CONFIG_OPTIONS, IProviders, StorageType };
+import { RedirectDirective } from './lib/redirect.directive';
+export { Ng2UiAuthModule, LocalService, Oauth2Service, Oauth1Service, PopupService, OauthService, SharedService, StorageService, BrowserStorageService, AuthService, ConfigService, JwtInterceptor, CONFIG_OPTIONS, IProviders, StorageType, RedirectDirective };
