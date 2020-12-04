@@ -531,7 +531,7 @@ class SharedService {
             // pass: All other tokens
             return true;
         }
-        // lail: No token at all
+        // fail: No token at all
         return false;
     }
     getExpirationDate(token = this.getToken()) {

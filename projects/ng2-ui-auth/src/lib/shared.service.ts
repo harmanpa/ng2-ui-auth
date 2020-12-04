@@ -29,7 +29,7 @@ export class SharedService {
     }
   }
 
-  public setToken(response: string | object): void {
+  public setToken(response: string | any): void {
     if (!response) {
       // console.warn('Can\'t set token without passing a value');
       return;
@@ -82,7 +82,7 @@ export class SharedService {
       // pass: All other tokens
       return true;
     }
-    // lail: No token at all
+    // fail: No token at all
     return false;
   }
 
