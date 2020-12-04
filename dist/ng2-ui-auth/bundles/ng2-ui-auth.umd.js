@@ -1013,7 +1013,9 @@
                 .pipe(operators.tap(function (data) { return _this.shared.setToken(data); }));
         };
         LocalService.prototype.signup = function (user, url) {
-            return this.http.post(url || joinUrl(this.config.options.baseUrl, this.config.options.signupUrl), user);
+            var _this = this;
+            return this.http.post(url || joinUrl(this.config.options.baseUrl, this.config.options.signupUrl), user)
+                .pipe(operators.tap(function (data) { return _this.shared.setToken(data); }));
         };
         return LocalService;
     }());
@@ -1103,7 +1105,7 @@
             if (options) {
                 var w = window;
                 var windowOrigin = getWindowOrigin(w);
-                var optionsObject = expand(parseQueryString(options));
+                var optionsObject = expand(parseQueryString(options))['options'];
                 var redirectUri = optionsObject.redirectUri;
                 return redirectUri != null && windowOrigin != null
                     && (redirectUri.indexOf(windowOrigin) === 0 || windowOrigin.indexOf(redirectUri) === 0)
@@ -1374,6 +1376,21 @@
                 ], (defaultJwtInterceptor
                     ? [{ provide: http.HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true, deps: [SharedService, ConfigService] }]
                     : []))
+            };
+        };
+        Ng2UiAuthModule.forChild = function () {
+            return {
+                ngModule: Ng2UiAuthModule,
+                providers: [
+                    { provide: ConfigService, useClass: ConfigService },
+                    { provide: StorageService, useClass: BrowserStorageService, deps: [ConfigService] },
+                    { provide: SharedService, useClass: SharedService, deps: [StorageService, ConfigService] },
+                    { provide: LocalService, useClass: LocalService, deps: [http.HttpClient, SharedService, ConfigService] },
+                    { provide: PopupService, useClass: PopupService, deps: [ConfigService] },
+                    { provide: OauthService, useClass: OauthService, deps: [http.HttpClient, SharedService, ConfigService, PopupService] },
+                    { provide: AuthService, useClass: AuthService, deps: [SharedService, LocalService, OauthService] },
+                    { provide: RedirectService, useClass: RedirectService, deps: [AuthService, StorageService, OauthService, SharedService] }
+                ]
             };
         };
         return Ng2UiAuthModule;

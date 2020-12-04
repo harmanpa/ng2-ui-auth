@@ -31,7 +31,7 @@ export class RedirectService {
     if (options) {
       const w: Window = window;
       const windowOrigin = getWindowOrigin(w);
-      const optionsObject = expand(parseQueryString(options)) as IOauth2Options;
+      const optionsObject = expand(parseQueryString(options))['options'] as IOauth2Options;
       const redirectUri = optionsObject.redirectUri;
       return redirectUri != null && windowOrigin != null
         && (redirectUri.indexOf(windowOrigin) === 0 || windowOrigin.indexOf(redirectUri) === 0)

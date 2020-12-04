@@ -1,10 +1,10 @@
 import { Observable } from 'rxjs';
-import { PopupService } from './popup.service';
 import { ConfigService } from './config.service';
 import { SharedService } from './shared.service';
 import { HttpClient } from '@angular/common/http';
-import { IOauthService } from './oauth-service';
 import { IHierarchicalObject, IOauthOptions } from './config-interfaces';
+import { IOauthService } from './oauth-service';
+import { PopupService } from './popup.service';
 export declare class OauthService {
     private http;
     private shared;

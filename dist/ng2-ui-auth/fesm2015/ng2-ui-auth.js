@@ -685,7 +685,8 @@ class LocalService {
             .pipe(tap(data => this.shared.setToken(data)));
     }
     signup(user, url) {
-        return this.http.post(url || joinUrl(this.config.options.baseUrl, this.config.options.signupUrl), user);
+        return this.http.post(url || joinUrl(this.config.options.baseUrl, this.config.options.signupUrl), user)
+            .pipe(tap(data => this.shared.setToken(data)));
     }
 }
 LocalService.decorators = [
@@ -773,7 +774,7 @@ class RedirectService {
         if (options) {
             const w = window;
             const windowOrigin = getWindowOrigin(w);
-            const optionsObject = expand(parseQueryString(options));
+            const optionsObject = expand(parseQueryString(options))['options'];
             const redirectUri = optionsObject.redirectUri;
             return redirectUri != null && windowOrigin != null
                 && (redirectUri.indexOf(windowOrigin) === 0 || windowOrigin.indexOf(redirectUri) === 0)
@@ -1026,6 +1027,21 @@ class Ng2UiAuthModule {
                 ...(defaultJwtInterceptor
                     ? [{ provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true, deps: [SharedService, ConfigService] }]
                     : [])
+            ]
+        };
+    }
+    static forChild() {
+        return {
+            ngModule: Ng2UiAuthModule,
+            providers: [
+                { provide: ConfigService, useClass: ConfigService },
+                { provide: StorageService, useClass: BrowserStorageService, deps: [ConfigService] },
+                { provide: SharedService, useClass: SharedService, deps: [StorageService, ConfigService] },
+                { provide: LocalService, useClass: LocalService, deps: [HttpClient, SharedService, ConfigService] },
+                { provide: PopupService, useClass: PopupService, deps: [ConfigService] },
+                { provide: OauthService, useClass: OauthService, deps: [HttpClient, SharedService, ConfigService, PopupService] },
+                { provide: AuthService, useClass: AuthService, deps: [SharedService, LocalService, OauthService] },
+                { provide: RedirectService, useClass: RedirectService, deps: [AuthService, StorageService, OauthService, SharedService] }
             ]
         };
     }

@@ -39,4 +39,20 @@ export class Ng2UiAuthModule {
       ]
     };
   }
+
+  static forChild(): ModuleWithProviders<Ng2UiAuthModule> {
+    return {
+      ngModule: Ng2UiAuthModule,
+      providers: [
+        {provide: ConfigService, useClass: ConfigService},
+        {provide: StorageService, useClass: BrowserStorageService, deps: [ConfigService]},
+        {provide: SharedService, useClass: SharedService, deps: [StorageService, ConfigService]},
+        {provide: LocalService, useClass: LocalService, deps: [HttpClient, SharedService, ConfigService]},
+        {provide: PopupService, useClass: PopupService, deps: [ConfigService]},
+        {provide: OauthService, useClass: OauthService, deps: [HttpClient, SharedService, ConfigService, PopupService]},
+        {provide: AuthService, useClass: AuthService, deps: [SharedService, LocalService, OauthService]},
+        {provide: RedirectService, useClass: RedirectService, deps: [AuthService, StorageService, OauthService, SharedService]}
+      ]
+    };
+  }
 }

@@ -1,16 +1,15 @@
 import {Injectable, Injector} from '@angular/core';
 import {joinUrl} from './utils';
 import {tap} from 'rxjs/operators';
-import {Oauth1Service} from './oauth1.service';
-import {Oauth2Service} from './oauth2.service';
 import {Observable} from 'rxjs';
-import {PopupService} from './popup.service';
 import {ConfigService} from './config.service';
 import {SharedService} from './shared.service';
 import {HttpClient} from '@angular/common/http';
-import {IOauthService} from './oauth-service';
 import {IHierarchicalObject, IOauthOptions} from './config-interfaces';
-import {RedirectService} from './redirect.service';
+import {IOauthService} from './oauth-service';
+import {Oauth1Service} from './oauth1.service';
+import {Oauth2Service} from './oauth2.service';
+import {PopupService} from './popup.service';
 
 @Injectable()
 export class OauthService {
@@ -27,7 +26,6 @@ export class OauthService {
 
   public authenticate(name: string, userData?: IHierarchicalObject): Observable<IHierarchicalObject> {
     const provider = this.getProvider(name);
-
     return provider.open(this.config.options.providers[name], userData || {}).pipe(
       tap(response => {
         // this is for a scenario when someone wishes to opt out from
