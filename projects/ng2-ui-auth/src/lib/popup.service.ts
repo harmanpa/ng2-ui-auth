@@ -1,14 +1,14 @@
-import { Injectable } from '@angular/core';
-import { empty, fromEvent, interval, merge, Observable, of, throwError } from 'rxjs';
-import { delay, map, switchMap, take } from 'rxjs/operators';
-import { IOauth1Options, IOauth2Options, IPopupOptions } from './config-interfaces';
-import { getWindowOrigin } from './utils';
+import {Injectable} from '@angular/core';
+import {EMPTY, fromEvent, interval, merge, Observable, of, throwError} from 'rxjs';
+import {delay, map, switchMap, take} from 'rxjs/operators';
+import {IOauth1Options, IOauth2Options, IPopupOptions, ISimpleObject} from './config-interfaces';
+import {getWindowOrigin, isCordovaApp, parseQueryString, stringifyOptions} from './utils';
 
-declare const cordova: any;
+
 @Injectable()
 export class PopupService {
-  public open(url: string, options: IOauth2Options | IOauth1Options, isCordova = this.isCordovaApp()): Observable<Window> {
-    const stringifiedOptions = this.stringifyOptions(this.prepareOptions(options.popupOptions));
+  public open(url: string, options: IOauth2Options | IOauth1Options, isCordova = isCordovaApp()): Observable<Window> {
+    const stringifiedOptions = stringifyOptions(this.prepareOptions(options.popupOptions));
     const windowName = isCordova ? '_blank' : options.name;
 
     const popupWindow = typeof window !== 'undefined' ? window.open(url, windowName, stringifiedOptions) : null;
@@ -22,13 +22,13 @@ export class PopupService {
     return throwError(new Error('Popup was not created'));
   }
 
-  public waitForClose(popupWindow: Window, isCordova = this.isCordovaApp(), redirectUri = getWindowOrigin()) {
+  public waitForClose(popupWindow: Window, isCordova = isCordovaApp(), redirectUri = getWindowOrigin()): Observable<ISimpleObject> {
     return isCordova ? this.eventListener(popupWindow, redirectUri) : this.pollPopup(popupWindow, redirectUri);
   }
 
-  private eventListener(popupWindow: Window, redirectUri = getWindowOrigin()) {
+  private eventListener(popupWindow: Window, redirectUri = getWindowOrigin()): Observable<ISimpleObject> {
     if (!popupWindow) {
-      throw new Error('Popup was not created');
+      return throwError(new Error('Popup was not created'));
     }
     return merge(
       fromEvent<Event>(popupWindow, 'exit').pipe(
@@ -44,7 +44,7 @@ export class PopupService {
           return Observable.throw(new Error('Authentication Canceled'));
         }
         if (event.url.indexOf(redirectUri) !== 0) {
-          return empty();
+          return EMPTY;
         }
 
         const parser = document.createElement('a');
@@ -53,9 +53,9 @@ export class PopupService {
         if (parser.search || parser.hash) {
           const queryParams = parser.search.substring(1).replace(/\/$/, '');
           const hashParams = parser.hash.substring(1).replace(/\/$/, '');
-          const hash = this.parseQueryString(hashParams);
-          const qs = this.parseQueryString(queryParams);
-          const allParams = { ...qs, ...hash };
+          const hash = parseQueryString(hashParams);
+          const qs = parseQueryString(queryParams);
+          const allParams = {...qs, ...hash};
 
           popupWindow.close();
 
@@ -65,13 +65,13 @@ export class PopupService {
             return of(allParams);
           }
         }
-        return empty();
+        return EMPTY;
       }),
       take(1)
     );
   }
 
-  private pollPopup(popupWindow: Window, redirectUri = getWindowOrigin()) {
+  private pollPopup(popupWindow: Window, redirectUri = getWindowOrigin()): Observable<ISimpleObject> {
     return interval(50).pipe(
       switchMap(() => {
         if (!popupWindow || popupWindow.closed) {
@@ -87,23 +87,23 @@ export class PopupService {
         ) {
           const queryParams = popupWindow.location.search.substring(1).replace(/\/$/, '');
           const hashParams = popupWindow.location.hash.substring(1).replace(/[\/$]/, '');
-          const hash = this.parseQueryString(hashParams);
-          const qs = this.parseQueryString(queryParams);
+          const hash = parseQueryString(hashParams);
+          const qs = parseQueryString(queryParams);
           popupWindow.close();
-          const allParams = { ...qs, ...hash };
+          const allParams = {...qs, ...hash};
           if (allParams.error) {
-            throw allParams.error;
+            return throwError(allParams.error);
           } else {
             return of(allParams);
           }
         }
-        return empty();
+        return EMPTY;
       }),
       take(1)
     );
   }
 
-  private prepareOptions(options?: IPopupOptions) {
+  private prepareOptions(options?: IPopupOptions): ISimpleObject {
     options = options || {};
     const width = options.width || 500;
     const height = options.height || 500;
@@ -115,31 +115,5 @@ export class PopupService {
       toolbar: options.visibleToolbar ? 'yes' : 'no',
       ...options
     };
-  }
-
-  private stringifyOptions(options: { [index: string]: string | number | boolean | null | undefined }) {
-    return Object.keys(options)
-      .map(key => (options[key] === null || options[key] === undefined ? key : key + '=' + options[key]))
-      .join(',');
-  }
-
-  private parseQueryString(joinedKeyValue: string): any {
-    let key;
-    let value;
-    return joinedKeyValue.split('&').reduce(
-      (obj, keyValue) => {
-        if (keyValue) {
-          value = keyValue.split('=');
-          key = decodeURIComponent(value[0]);
-          obj[key] = typeof value[1] !== 'undefined' ? decodeURIComponent(value[1]) : true;
-        }
-        return obj;
-      },
-      {} as { [k: string]: string | true }
-    );
-  }
-
-  private isCordovaApp() {
-    return typeof cordova === 'object' || (document.URL.indexOf('http://') === -1 && document.URL.indexOf('https://') === -1);
   }
 }

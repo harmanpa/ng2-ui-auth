@@ -1,11 +1,8 @@
-import { InjectionToken, Injectable, Inject, Injector, NgModule } from '@angular/core';
+import { InjectionToken, Injectable, Inject, Injector, EventEmitter, Directive, Output, NgModule } from '@angular/core';
 import { HttpClient, HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
-import { Observable, of, throwError, merge, fromEvent, empty, interval } from 'rxjs';
-import { delay, map, switchMap, take, tap } from 'rxjs/operators';
+import { Observable, of, throwError, merge, fromEvent, EMPTY, interval } from 'rxjs';
+import { delay, map, switchMap, take, tap, mergeMap } from 'rxjs/operators';
 
-/**
- * Created by Ron on 17/12/2015.
- */
 function joinUrl(baseUrl, url) {
     if (/^(?:[a-z]+:)?\/\//i.test(url)) {
         return url;
@@ -40,6 +37,82 @@ function getWindowOrigin(w) {
         // ignore DOMException: Blocked a frame with origin from accessing a cross-origin frame.
         // error instanceof DOMException && error.name === 'SecurityError'
     }
+}
+function stringifyOptions(options) {
+    return Object.keys(options)
+        .map(key => (options[key] === null || options[key] === undefined ? key : key + '=' + options[key]))
+        .join(',');
+}
+function parseQueryString(joinedKeyValue) {
+    let key;
+    let value;
+    return joinedKeyValue.split('&').reduce((obj, keyValue) => {
+        if (keyValue) {
+            value = keyValue.split('=');
+            key = decodeURIComponent(value[0]);
+            obj[key] = typeof value[1] !== 'undefined' ? decodeURIComponent(value[1]) : true;
+        }
+        return obj;
+    }, {});
+}
+function flatten(obj) {
+    const out = {};
+    Object.keys(obj).forEach(key => {
+        if (typeof (obj[key]) === 'object') {
+            const subobj = flatten(obj[key]);
+            Object.keys(subobj).forEach(subkey => out[key + '.' + subkey] = subobj[subkey]);
+        }
+        else {
+            out[key] = obj[key];
+        }
+    });
+    return out;
+}
+function expand(obj) {
+    const out = {};
+    const roots = Object.keys(obj)
+        .map(key => key.indexOf('.') > -1 ? key.substring(0, key.indexOf('.')) : key)
+        .filter((value, index, array) => array.indexOf(value) === index);
+    roots.forEach(key => {
+        if (obj[key]) {
+            out[key] = obj[key];
+        }
+        else {
+            const childObject = {};
+            Object.keys(obj).filter(k => k.startsWith(key + '.')).forEach(k => {
+                childObject[k.substr(key.length + 1)] = obj[k];
+            });
+            out[key] = expand(childObject);
+        }
+    });
+    return out;
+}
+function staticify(obj) {
+    const out = {};
+    Object.keys(obj).forEach(key => {
+        switch (typeof (obj[key])) {
+            case 'number':
+            case 'string':
+            case 'boolean':
+                out[key] = obj[key];
+                break;
+            case 'function':
+                const tmpObj = staticify({ tmp: obj[key]() });
+                out[key] = tmpObj['tmp'];
+                break;
+            case 'object':
+                if (obj[key]) {
+                    out[key] = staticify(obj[key]);
+                }
+                else {
+                    out[key] = null;
+                }
+        }
+    });
+    return out;
+}
+function isCordovaApp() {
+    return typeof cordova === 'object' || (document.URL.indexOf('http://') === -1 && document.URL.indexOf('https://') === -1);
 }
 
 const ɵ0 = () => encodeURIComponent(Math.random()
@@ -471,7 +544,7 @@ class SharedService {
         return null;
     }
     logout() {
-        return Observable.create((observer) => {
+        return new Observable((observer) => {
             this.storage.remove(this.tokenName);
             observer.next();
             observer.complete();
@@ -481,7 +554,9 @@ class SharedService {
         return this.storage.updateStorageType(type);
     }
     b64DecodeUnicode(str) {
-        return decodeURIComponent(Array.prototype.map.call(atob(str), c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
+        return decodeURIComponent(Array.prototype.map
+            .call(atob(str), c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+            .join(''));
     }
 }
 SharedService.decorators = [
@@ -514,8 +589,8 @@ JwtInterceptor.ctorParameters = () => [
 ];
 
 class PopupService {
-    open(url, options, isCordova = this.isCordovaApp()) {
-        const stringifiedOptions = this.stringifyOptions(this.prepareOptions(options.popupOptions));
+    open(url, options, isCordova = isCordovaApp()) {
+        const stringifiedOptions = stringifyOptions(this.prepareOptions(options.popupOptions));
         const windowName = isCordova ? '_blank' : options.name;
         const popupWindow = typeof window !== 'undefined' ? window.open(url, windowName, stringifiedOptions) : null;
         if (popupWindow) {
@@ -526,12 +601,12 @@ class PopupService {
         }
         return throwError(new Error('Popup was not created'));
     }
-    waitForClose(popupWindow, isCordova = this.isCordovaApp(), redirectUri = getWindowOrigin()) {
+    waitForClose(popupWindow, isCordova = isCordovaApp(), redirectUri = getWindowOrigin()) {
         return isCordova ? this.eventListener(popupWindow, redirectUri) : this.pollPopup(popupWindow, redirectUri);
     }
     eventListener(popupWindow, redirectUri = getWindowOrigin()) {
         if (!popupWindow) {
-            throw new Error('Popup was not created');
+            return throwError(new Error('Popup was not created'));
         }
         return merge(fromEvent(popupWindow, 'exit').pipe(delay(100), map(() => {
             throw new Error('Authentication Canceled');
@@ -540,15 +615,15 @@ class PopupService {
                 return Observable.throw(new Error('Authentication Canceled'));
             }
             if (event.url.indexOf(redirectUri) !== 0) {
-                return empty();
+                return EMPTY;
             }
             const parser = document.createElement('a');
             parser.href = event.url;
             if (parser.search || parser.hash) {
                 const queryParams = parser.search.substring(1).replace(/\/$/, '');
                 const hashParams = parser.hash.substring(1).replace(/\/$/, '');
-                const hash = this.parseQueryString(hashParams);
-                const qs = this.parseQueryString(queryParams);
+                const hash = parseQueryString(hashParams);
+                const qs = parseQueryString(queryParams);
                 const allParams = Object.assign(Object.assign({}, qs), hash);
                 popupWindow.close();
                 if (allParams.error) {
@@ -558,7 +633,7 @@ class PopupService {
                     return of(allParams);
                 }
             }
-            return empty();
+            return EMPTY;
         }), take(1));
     }
     pollPopup(popupWindow, redirectUri = getWindowOrigin()) {
@@ -572,18 +647,18 @@ class PopupService {
                 (popupWindow.location.search || popupWindow.location.hash)) {
                 const queryParams = popupWindow.location.search.substring(1).replace(/\/$/, '');
                 const hashParams = popupWindow.location.hash.substring(1).replace(/[\/$]/, '');
-                const hash = this.parseQueryString(hashParams);
-                const qs = this.parseQueryString(queryParams);
+                const hash = parseQueryString(hashParams);
+                const qs = parseQueryString(queryParams);
                 popupWindow.close();
                 const allParams = Object.assign(Object.assign({}, qs), hash);
                 if (allParams.error) {
-                    throw allParams.error;
+                    return throwError(allParams.error);
                 }
                 else {
                     return of(allParams);
                 }
             }
-            return empty();
+            return EMPTY;
         }), take(1));
     }
     prepareOptions(options) {
@@ -593,168 +668,9 @@ class PopupService {
         return Object.assign({ width,
             height, left: window.screenX + (window.outerWidth - width) / 2, top: window.screenY + (window.outerHeight - height) / 2.5, toolbar: options.visibleToolbar ? 'yes' : 'no' }, options);
     }
-    stringifyOptions(options) {
-        return Object.keys(options)
-            .map(key => (options[key] === null || options[key] === undefined ? key : key + '=' + options[key]))
-            .join(',');
-    }
-    parseQueryString(joinedKeyValue) {
-        let key;
-        let value;
-        return joinedKeyValue.split('&').reduce((obj, keyValue) => {
-            if (keyValue) {
-                value = keyValue.split('=');
-                key = decodeURIComponent(value[0]);
-                obj[key] = typeof value[1] !== 'undefined' ? decodeURIComponent(value[1]) : true;
-            }
-            return obj;
-        }, {});
-    }
-    isCordovaApp() {
-        return typeof cordova === 'object' || (document.URL.indexOf('http://') === -1 && document.URL.indexOf('https://') === -1);
-    }
 }
 PopupService.decorators = [
     { type: Injectable }
-];
-
-class Oauth1Service {
-    constructor(http, popup, config) {
-        this.http = http;
-        this.popup = popup;
-        this.config = config;
-    }
-    open(oauthOptions, userData) {
-        const serverUrl = this.config.options.baseUrl ? joinUrl(this.config.options.baseUrl, oauthOptions.url) : oauthOptions.url;
-        return this.popup.open('about:blank', oauthOptions, this.config.options.cordova).pipe(switchMap(popupWindow => this.http.post(serverUrl, oauthOptions).pipe(tap(authorizationData => popupWindow
-            ? popupWindow.location.replace([oauthOptions.authorizationEndpoint, buildQueryString(authorizationData)].join('?'))
-            : undefined), switchMap(authorizationData => this.popup
-            .waitForClose(popupWindow, this.config.options.cordova, oauthOptions.redirectUri)
-            .pipe(map(oauthData => ({ authorizationData, oauthData })))))), switchMap(({ authorizationData, oauthData }) => this.exchangeForToken(oauthOptions, authorizationData, oauthData, userData)));
-    }
-    exchangeForToken(oauthOptions, authorizationData, oauthData, userData) {
-        const body = { oauthOptions, authorizationData, oauthData, userData };
-        const { withCredentials, baseUrl } = this.config.options;
-        const { method = 'POST', url } = oauthOptions;
-        const exchangeForTokenUrl = baseUrl ? joinUrl(baseUrl, url) : url;
-        return this.http.request(method, exchangeForTokenUrl, { body, withCredentials });
-    }
-}
-Oauth1Service.decorators = [
-    { type: Injectable }
-];
-Oauth1Service.ctorParameters = () => [
-    { type: HttpClient },
-    { type: PopupService },
-    { type: ConfigService }
-];
-
-class Oauth2Service {
-    constructor(http, popup, config) {
-        this.http = http;
-        this.popup = popup;
-        this.config = config;
-    }
-    open(oauthOptions, userData) {
-        const authorizationData = this.getAuthorizationData(oauthOptions);
-        const url = [oauthOptions.authorizationEndpoint, buildQueryString(authorizationData)].join('?');
-        return this.popup.open(url, oauthOptions, this.config.options.cordova).pipe(switchMap((window) => window ? this.popup.waitForClose(window, this.config.options.cordova, oauthOptions.redirectUri) : empty()), switchMap((oauthData) => {
-            // when no server URL provided, return popup params as-is.
-            // this is for a scenario when someone wishes to opt out from
-            // satellizer's magic by doing authorization code exchange and
-            // saving a token manually.
-            if (oauthOptions.responseType === 'token' || !oauthOptions.url) {
-                return of(oauthData);
-            }
-            if (oauthData.state && oauthData.state !== authorizationData.state) {
-                throw new Error('OAuth "state" mismatch');
-            }
-            return this.exchangeForToken(oauthOptions, authorizationData, oauthData, userData);
-        }));
-    }
-    exchangeForToken(options, authorizationData, oauthData, userData) {
-        const body = { authorizationData, oauthData, userData };
-        const { baseUrl, withCredentials } = this.config.options;
-        const { url, method = 'POST' } = options;
-        const exchangeForTokenUrl = baseUrl ? joinUrl(baseUrl, url) : url;
-        return this.http.request(method, exchangeForTokenUrl, { body, withCredentials });
-    }
-    getAuthorizationData(options) {
-        const { responseType = 'code', clientId, redirectUri = getWindowOrigin() || '', scopeDelimiter = ',', scope, state, additionalUrlParams } = options;
-        const resolvedState = typeof state === 'function' ? state() : state;
-        return [
-            ['response_type', responseType],
-            ['client_id', clientId],
-            ['redirect_uri', redirectUri],
-            ...(state ? [['state', resolvedState]] : []),
-            ...(scope ? [['scope', scope.join(scopeDelimiter)]] : []),
-            ...(additionalUrlParams
-                ? Object.keys(additionalUrlParams).map(key => {
-                    const value = additionalUrlParams[key];
-                    if (typeof value === 'string') {
-                        return [key, value];
-                    }
-                    else if (typeof value === 'function') {
-                        return [key, value()];
-                    }
-                    else if (value === null) {
-                        return [key, ''];
-                    }
-                    return ['', ''];
-                })
-                : [])
-        ]
-            .filter(_ => !!_[0])
-            .reduce((acc, next) => (Object.assign(Object.assign({}, acc), { [next[0]]: next[1] })), {});
-    }
-}
-Oauth2Service.decorators = [
-    { type: Injectable }
-];
-Oauth2Service.ctorParameters = () => [
-    { type: HttpClient },
-    { type: PopupService },
-    { type: ConfigService }
-];
-
-class OauthService {
-    constructor(http, shared, config, popup) {
-        this.http = http;
-        this.shared = shared;
-        this.config = config;
-        this.popup = popup;
-        this.depProviders = [
-            { provide: HttpClient, useValue: this.http },
-            { provide: PopupService, useValue: this.popup },
-            { provide: ConfigService, useValue: this.config }
-        ];
-        this.deps = [HttpClient, PopupService, ConfigService];
-    }
-    authenticate(name, userData) {
-        const provider = this.config.options.providers[name].oauthType === '1.0'
-            ? Injector.create([...this.depProviders, { provide: Oauth1Service, deps: this.deps }]).get(Oauth1Service)
-            : Injector.create([...this.depProviders, { provide: Oauth2Service, deps: this.deps }]).get(Oauth2Service);
-        return provider.open(this.config.options.providers[name], userData || {}).pipe(tap(response => {
-            // this is for a scenario when someone wishes to opt out from
-            // satellizer's magic by doing authorization code exchange and
-            // saving a token manually.
-            if (this.config.options.providers[name].url) {
-                this.shared.setToken(response);
-            }
-        }));
-    }
-    unlink(provider, url = joinUrl(this.config.options.baseUrl, this.config.options.unlinkUrl), method = 'POST') {
-        return this.http.request(method, url, { body: { provider } });
-    }
-}
-OauthService.decorators = [
-    { type: Injectable }
-];
-OauthService.ctorParameters = () => [
-    { type: HttpClient },
-    { type: SharedService },
-    { type: ConfigService },
-    { type: PopupService }
 ];
 
 class LocalService {
@@ -836,6 +752,263 @@ AuthService.ctorParameters = () => [
     { type: OauthService }
 ];
 
+class RedirectService {
+    constructor(authService, storage, oauth, shared) {
+        this.authService = authService;
+        this.storage = storage;
+        this.oauth = oauth;
+        this.shared = shared;
+    }
+    go(url, options, authorizationData, userData) {
+        if (window) {
+            const qs = buildQueryString(flatten(staticify({ options, authorizationData, userData })));
+            this.storage.set('ng2-ui-auth-REDIRECT', qs, '');
+            window.open(url, '_self');
+            return of({});
+        }
+        return throwError('Failed to redirect');
+    }
+    isRedirect() {
+        const options = this.storage.get('ng2-ui-auth-REDIRECT');
+        if (options) {
+            const w = window;
+            const windowOrigin = getWindowOrigin(w);
+            const optionsObject = expand(parseQueryString(options));
+            const redirectUri = optionsObject.redirectUri;
+            return redirectUri != null && windowOrigin != null
+                && (redirectUri.indexOf(windowOrigin) === 0 || windowOrigin.indexOf(redirectUri) === 0)
+                && (w.location.search != null || w.location.hash != null);
+        }
+    }
+    handleRedirect() {
+        const options = this.storage.get('ng2-ui-auth-REDIRECT');
+        if (options) {
+            const w = window;
+            const windowOrigin = getWindowOrigin(w);
+            const data = expand(parseQueryString(options));
+            const optionsObject = data['options'];
+            const authorizationData = data['authorizationData'];
+            const userData = data['userData'];
+            const redirectUri = optionsObject.redirectUri;
+            if (redirectUri != null && windowOrigin != null
+                && (redirectUri.indexOf(windowOrigin) === 0 || windowOrigin.indexOf(redirectUri) === 0)
+                && (w.location.search != null || w.location.hash != null)) {
+                const queryParams = w.location.search.substring(1).replace(/\/$/, '');
+                const hashParams = w.location.hash.substring(1).replace(/[\/$]/, '');
+                const hash = parseQueryString(hashParams);
+                const qs = parseQueryString(queryParams);
+                const allParams = Object.assign(Object.assign({}, qs), hash);
+                if (allParams.error) {
+                    throw throwError(allParams.error);
+                }
+                else {
+                    return this.oauth.getProvider(optionsObject)
+                        .exchangeForToken(optionsObject, authorizationData, allParams, userData)
+                        .pipe(tap(response => {
+                        this.shared.setToken(response);
+                        this.storage.remove('ng2-ui-auth-REDIRECT');
+                    }));
+                }
+            }
+            return throwError('Not at valid redirect URI');
+        }
+        return throwError('No stored options for redirect');
+    }
+}
+RedirectService.decorators = [
+    { type: Injectable }
+];
+RedirectService.ctorParameters = () => [
+    { type: AuthService },
+    { type: StorageService },
+    { type: OauthService },
+    { type: SharedService }
+];
+
+class Oauth1Service {
+    constructor(http, popup, config, redirect) {
+        this.http = http;
+        this.popup = popup;
+        this.config = config;
+        this.redirect = redirect;
+    }
+    open(oauthOptions, userData) {
+        const serverUrl = this.config.options.baseUrl ? joinUrl(this.config.options.baseUrl, oauthOptions.url) : oauthOptions.url;
+        if (oauthOptions.doRedirect) {
+            return this.http.post(serverUrl, oauthOptions)
+                .pipe(mergeMap(authorizationData => this.redirect.go([oauthOptions.authorizationEndpoint, buildQueryString(authorizationData)].join('?'), oauthOptions, authorizationData, userData)));
+        }
+        return this.popup.open('about:blank', oauthOptions, this.config.options.cordova).pipe(switchMap(popupWindow => this.http.post(serverUrl, oauthOptions).pipe(tap(authorizationData => popupWindow
+            ? popupWindow.location.replace([oauthOptions.authorizationEndpoint, buildQueryString(authorizationData)].join('?'))
+            : undefined), switchMap(authorizationData => this.popup
+            .waitForClose(popupWindow, this.config.options.cordova, oauthOptions.redirectUri)
+            .pipe(map(oauthData => ({ authorizationData, oauthData })))))), switchMap(({ authorizationData, oauthData }) => this.exchangeForToken(oauthOptions, authorizationData, oauthData, userData)));
+    }
+    exchangeForToken(oauthOptions, authorizationData, oauthData, userData) {
+        const body = { oauthOptions, authorizationData, oauthData, userData };
+        const { withCredentials, baseUrl } = this.config.options;
+        const { method = 'POST', url } = oauthOptions;
+        const exchangeForTokenUrl = baseUrl ? joinUrl(baseUrl, url) : url;
+        return this.http.request(method, exchangeForTokenUrl, { body, withCredentials });
+    }
+}
+Oauth1Service.decorators = [
+    { type: Injectable }
+];
+Oauth1Service.ctorParameters = () => [
+    { type: HttpClient },
+    { type: PopupService },
+    { type: ConfigService },
+    { type: RedirectService }
+];
+
+class Oauth2Service {
+    constructor(http, popup, config, redirect) {
+        this.http = http;
+        this.popup = popup;
+        this.config = config;
+        this.redirect = redirect;
+    }
+    open(oauthOptions, userData) {
+        const authorizationData = this.getAuthorizationData(oauthOptions);
+        const url = [oauthOptions.authorizationEndpoint, buildQueryString(authorizationData)].join('?');
+        if (oauthOptions.doRedirect) {
+            return this.redirect.go(url, oauthOptions, authorizationData, userData);
+        }
+        return this.popup.open(url, oauthOptions, this.config.options.cordova).pipe(switchMap((window) => this.popup.waitForClose(window, this.config.options.cordova, oauthOptions.redirectUri)), switchMap((oauthData) => {
+            // when no server URL provided, return popup params as-is.
+            // this is for a scenario when someone wishes to opt out from
+            // satellizer's magic by doing authorization code exchange and
+            // saving a token manually.
+            if (oauthOptions.responseType === 'token' || !oauthOptions.url) {
+                return of(expand(oauthData));
+            }
+            if (oauthData.state && oauthData.state !== authorizationData.state) {
+                return throwError('OAuth "state" mismatch');
+            }
+            return this.exchangeForToken(oauthOptions, authorizationData, oauthData, userData);
+        }));
+    }
+    exchangeForToken(options, authorizationData, oauthData, userData) {
+        const body = { authorizationData, oauthData, userData };
+        const { baseUrl, withCredentials } = this.config.options;
+        const { url, method = 'POST' } = options;
+        const exchangeForTokenUrl = baseUrl ? joinUrl(baseUrl, url) : url;
+        return this.http.request(method, exchangeForTokenUrl, { body, withCredentials });
+    }
+    getAuthorizationData(options) {
+        const { responseType = 'code', clientId, redirectUri = getWindowOrigin() || '', scopeDelimiter = ',', scope, state, additionalUrlParams } = options;
+        const resolvedState = typeof state === 'function' ? state() : state;
+        return [
+            ['response_type', responseType],
+            ['client_id', clientId],
+            ['redirect_uri', redirectUri],
+            ...(state ? [['state', resolvedState]] : []),
+            ...(scope ? [['scope', scope.join(scopeDelimiter)]] : []),
+            ...(additionalUrlParams
+                ? Object.keys(additionalUrlParams).map(key => {
+                    const value = additionalUrlParams[key];
+                    if (typeof value === 'string') {
+                        return [key, value];
+                    }
+                    else if (typeof value === 'function') {
+                        return [key, value()];
+                    }
+                    else if (value === null) {
+                        return [key, ''];
+                    }
+                    return ['', ''];
+                })
+                : [])
+        ]
+            .filter(_ => !!_[0])
+            .reduce((acc, next) => (Object.assign(Object.assign({}, acc), { [next[0]]: next[1] })), {});
+    }
+}
+Oauth2Service.decorators = [
+    { type: Injectable }
+];
+Oauth2Service.ctorParameters = () => [
+    { type: HttpClient },
+    { type: PopupService },
+    { type: ConfigService },
+    { type: RedirectService }
+];
+
+class OauthService {
+    constructor(http, shared, config, popup) {
+        this.http = http;
+        this.shared = shared;
+        this.config = config;
+        this.popup = popup;
+        this.depProviders = [
+            { provide: HttpClient, useValue: this.http },
+            { provide: PopupService, useValue: this.popup },
+            { provide: ConfigService, useValue: this.config }
+        ];
+        this.deps = [HttpClient, PopupService, ConfigService];
+    }
+    authenticate(name, userData) {
+        const provider = this.getProvider(name);
+        return provider.open(this.config.options.providers[name], userData || {}).pipe(tap(response => {
+            // this is for a scenario when someone wishes to opt out from
+            // satellizer's magic by doing authorization code exchange and
+            // saving a token manually.
+            if (this.config.options.providers[name].url) {
+                this.shared.setToken(response);
+            }
+        }));
+    }
+    getProvider(id) {
+        const type = typeof (id) === 'string' ? this.config.options.providers[id].oauthType : id['oauthType'];
+        const provider = type === '1.0'
+            ? Injector.create([...this.depProviders, { provide: Oauth1Service, deps: this.deps }]).get(Oauth1Service)
+            : Injector.create([...this.depProviders, { provide: Oauth2Service, deps: this.deps }]).get(Oauth2Service);
+        return provider;
+    }
+    unlink(provider, url = joinUrl(this.config.options.baseUrl, this.config.options.unlinkUrl), method = 'POST') {
+        return this.http.request(method, url, { body: { provider } });
+    }
+}
+OauthService.decorators = [
+    { type: Injectable }
+];
+OauthService.ctorParameters = () => [
+    { type: HttpClient },
+    { type: SharedService },
+    { type: ConfigService },
+    { type: PopupService }
+];
+
+class RedirectDirective {
+    constructor(redirect) {
+        this.redirect = redirect;
+        this.onLogin = new EventEmitter();
+        this.onLoginError = new EventEmitter();
+    }
+    ngOnInit() {
+        if (this.redirect.isRedirect()) {
+            this.redirect.handleRedirect()
+                .subscribe({
+                next: value => this.onLogin.emit(value),
+                error: err => this.onLoginError.emit(err)
+            });
+        }
+    }
+}
+RedirectDirective.decorators = [
+    { type: Directive, args: [{
+                selector: '[authRedirect]'
+            },] }
+];
+RedirectDirective.ctorParameters = () => [
+    { type: RedirectService }
+];
+RedirectDirective.propDecorators = {
+    onLogin: [{ type: Output }],
+    onLoginError: [{ type: Output }]
+};
+
 class Ng2UiAuthModule {
     static forRoot(configOptions, defaultJwtInterceptor = true) {
         return {
@@ -859,7 +1032,7 @@ class Ng2UiAuthModule {
 Ng2UiAuthModule.decorators = [
     { type: NgModule, args: [{
                 imports: [HttpClientModule],
-                declarations: [],
+                declarations: [RedirectDirective],
                 exports: []
             },] }
 ];
@@ -868,5 +1041,5 @@ Ng2UiAuthModule.decorators = [
  * Generated bundle index. Do not edit.
  */
 
-export { AuthService, BrowserStorageService, CONFIG_OPTIONS, ConfigService, JwtInterceptor, LocalService, Ng2UiAuthModule, Oauth1Service, Oauth2Service, OauthService, PopupService, SharedService, StorageService, StorageType };
+export { AuthService, BrowserStorageService, CONFIG_OPTIONS, ConfigService, JwtInterceptor, LocalService, Ng2UiAuthModule, Oauth1Service, Oauth2Service, OauthService, PopupService, SharedService, StorageService, StorageType, RedirectDirective as ɵb, RedirectService as ɵc };
 //# sourceMappingURL=ng2-ui-auth.js.map

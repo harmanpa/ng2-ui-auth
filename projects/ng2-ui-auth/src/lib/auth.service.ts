@@ -1,32 +1,34 @@
-import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
-import { LocalService } from './local.service';
-import { OauthService } from './oauth.service';
-import { SharedService } from './shared.service';
-import { StorageType } from './storage-type.enum';
+import {Injectable} from '@angular/core';
+import {Observable} from 'rxjs';
+import {LocalService} from './local.service';
+import {OauthService} from './oauth.service';
+import {SharedService} from './shared.service';
+import {StorageType} from './storage-type.enum';
+import {IHierarchicalObject} from './config-interfaces';
 
 @Injectable()
 export class AuthService {
-  constructor(private shared: SharedService, private local: LocalService, private oauth: OauthService) {}
-
-  public login<T extends string | object = any>(user: string | object, url?: string): Observable<T> {
-    return this.local.login<T>(user, url);
+  constructor(private shared: SharedService, private local: LocalService, private oauth: OauthService) {
   }
 
-  public signup<T = any>(user: string | object, url?: string): Observable<T> {
-    return this.local.signup<T>(user, url);
+  public login(user: string | IHierarchicalObject, url?: string): Observable<IHierarchicalObject> {
+    return this.local.login(user, url);
+  }
+
+  public signup(user: string | IHierarchicalObject, url?: string): Observable<IHierarchicalObject> {
+    return this.local.signup(user, url);
   }
 
   public logout(): Observable<void> {
     return this.shared.logout();
   }
 
-  public authenticate<T extends object | string = any>(name: string, userData?: any): Observable<T> {
-    return this.oauth.authenticate<T>(name, userData);
+  public authenticate(name: string, userData?: IHierarchicalObject): Observable<IHierarchicalObject> {
+    return this.oauth.authenticate(name, userData);
   }
 
-  public link<T extends object | string = any>(name: string, userData?: any): Observable<T> {
-    return this.oauth.authenticate<T>(name, userData);
+  public link(name: string, userData?: IHierarchicalObject): Observable<IHierarchicalObject> {
+    return this.oauth.authenticate(name, userData);
   }
 
   public unlink<T = any>(provider: string, url?: string): Observable<T> {

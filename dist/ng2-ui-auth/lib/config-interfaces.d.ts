@@ -6,23 +6,20 @@ export interface IPopupOptions {
     top?: number;
     visibleToolbar?: boolean;
 }
-export interface IOauth1Options {
+export interface IOauthOptions {
     url?: string;
     name?: string;
     redirectUri?: string;
     popupOptions?: IPopupOptions;
     authorizationEndpoint?: string;
-    oauthType?: '1.0';
     method?: string;
+    doRedirect?: boolean;
 }
-export interface IOauth2Options {
-    url?: string;
-    name?: string;
-    redirectUri?: string;
-    popupOptions?: IPopupOptions;
-    authorizationEndpoint?: string;
+export interface IOauth1Options extends IOauthOptions {
+    oauthType?: '1.0';
+}
+export interface IOauth2Options extends IOauthOptions {
     oauthType?: '2.0';
-    method?: string;
     responseType?: string;
     clientId?: string;
     additionalUrlParams?: {
@@ -68,4 +65,10 @@ export interface IPartialConfigOptions {
     providers?: IProviders;
     withCredentials?: boolean;
     resolveToken?: (response: any, config: IConfigOptions) => string;
+}
+export interface ISimpleObject {
+    [key: string]: string | number | boolean | null;
+}
+export interface IHierarchicalObject {
+    [key: string]: string | number | boolean | null | IHierarchicalObject;
 }

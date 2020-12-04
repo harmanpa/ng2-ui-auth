@@ -1,50 +1,58 @@
-import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
-import { empty, Observable, of } from 'rxjs';
-import { switchMap } from 'rxjs/operators';
-import { IOauth2Options } from './config-interfaces';
-import { ConfigService } from './config.service';
-import { IOauthService } from './oauth-service';
-import { PopupService } from './popup.service';
-import { buildQueryString, getWindowOrigin, joinUrl } from './utils';
+import {HttpClient} from '@angular/common/http';
+import {Injectable} from '@angular/core';
+import {EMPTY, Observable, of, throwError} from 'rxjs';
+import {switchMap} from 'rxjs/operators';
+import {IHierarchicalObject, IOauth2Options, ISimpleObject} from './config-interfaces';
+import {ConfigService} from './config.service';
+import {IOauthService} from './oauth-service';
+import {PopupService} from './popup.service';
+import {buildQueryString, expand, getWindowOrigin, joinUrl} from './utils';
+import {RedirectService} from './redirect.service';
 
 @Injectable()
-export class Oauth2Service implements IOauthService {
-  constructor(private http: HttpClient, private popup: PopupService, private config: ConfigService) {}
+export class Oauth2Service implements IOauthService<IOauth2Options> {
+  constructor(private http: HttpClient, private popup: PopupService, private config: ConfigService, private redirect: RedirectService) {
+  }
 
-  open<T extends object | string = any>(oauthOptions: IOauth2Options, userData: object): Observable<T> {
+  open(oauthOptions: IOauth2Options, userData: IHierarchicalObject): Observable<IHierarchicalObject> {
     const authorizationData = this.getAuthorizationData(oauthOptions);
     const url = [oauthOptions.authorizationEndpoint, buildQueryString(authorizationData)].join('?');
+    if (oauthOptions.doRedirect) {
+      return this.redirect.go(url, oauthOptions, authorizationData, userData);
+    }
     return this.popup.open(url, oauthOptions, this.config.options.cordova).pipe(
-      switchMap((window?: Window) =>
-        window ? this.popup.waitForClose(window, this.config.options.cordova, oauthOptions.redirectUri) : empty()
+      switchMap((window: Window) =>
+        this.popup.waitForClose(window, this.config.options.cordova, oauthOptions.redirectUri)
       ),
-      switchMap((oauthData: any) => {
+      switchMap((oauthData: ISimpleObject) => {
         // when no server URL provided, return popup params as-is.
         // this is for a scenario when someone wishes to opt out from
         // satellizer's magic by doing authorization code exchange and
         // saving a token manually.
         if (oauthOptions.responseType === 'token' || !oauthOptions.url) {
-          return of(oauthData);
+          return of(expand(oauthData));
         }
 
         if (oauthData.state && oauthData.state !== authorizationData.state) {
-          throw new Error('OAuth "state" mismatch');
+          return throwError('OAuth "state" mismatch');
         }
-        return this.exchangeForToken<T>(oauthOptions, authorizationData, oauthData, userData);
+        return this.exchangeForToken(oauthOptions, authorizationData, oauthData, userData);
       })
     );
   }
 
-  private exchangeForToken<T>(options: IOauth2Options, authorizationData: object, oauthData: object, userData: object) {
-    const body = { authorizationData, oauthData, userData };
-    const { baseUrl, withCredentials } = this.config.options;
-    const { url, method = 'POST' } = options;
+  exchangeForToken(options: IOauth2Options,
+                   authorizationData: ISimpleObject,
+                   oauthData: ISimpleObject,
+                   userData: IHierarchicalObject): Observable<IHierarchicalObject> {
+    const body = {authorizationData, oauthData, userData};
+    const {baseUrl, withCredentials} = this.config.options;
+    const {url, method = 'POST'} = options;
     const exchangeForTokenUrl = baseUrl ? joinUrl(baseUrl, url) : url;
-    return this.http.request<T>(method, exchangeForTokenUrl, { body, withCredentials });
+    return this.http.request<IHierarchicalObject>(method, exchangeForTokenUrl, {body, withCredentials});
   }
 
-  private getAuthorizationData(options: IOauth2Options) {
+  private getAuthorizationData(options: IOauth2Options): ISimpleObject {
     const {
       responseType = 'code',
       clientId,
@@ -63,19 +71,19 @@ export class Oauth2Service implements IOauthService {
       ...(scope ? [['scope', scope.join(scopeDelimiter)]] : []),
       ...(additionalUrlParams
         ? Object.keys(additionalUrlParams).map(key => {
-            const value: string | (() => string) | null | undefined = (additionalUrlParams as any)[key];
-            if (typeof value === 'string') {
-              return [key, value];
-            } else if (typeof value === 'function') {
-              return [key, value()];
-            } else if (value === null) {
-              return [key, ''];
-            }
-            return ['', ''];
-          })
+          const value: string | (() => string) | null | undefined = (additionalUrlParams as any)[key];
+          if (typeof value === 'string') {
+            return [key, value];
+          } else if (typeof value === 'function') {
+            return [key, value()];
+          } else if (value === null) {
+            return [key, ''];
+          }
+          return ['', ''];
+        })
         : [])
     ]
       .filter(_ => !!_[0])
-      .reduce((acc, next) => ({ ...acc, [next[0]]: next[1] }), {} as { [key: string]: string });
+      .reduce((acc, next) => ({...acc, [next[0]]: next[1]}), {} as ISimpleObject);
   }
 }

@@ -11,10 +11,11 @@ import { HttpClient } from '@angular/common/http';
 import { PopupService } from './popup.service';
 import { LocalService } from './local.service';
 import { AuthService } from './auth.service';
+import { RedirectDirective } from './redirect.directive';
 
 @NgModule({
   imports: [HttpClientModule],
-  declarations: [],
+  declarations: [RedirectDirective],
   exports: []
 })
 export class Ng2UiAuthModule {

@@ -1,8 +1,8 @@
-import { Injectable } from '@angular/core';
-import { StorageType } from './storage-type.enum';
-import { Subscriber, Observable } from 'rxjs';
-import { StorageService } from './storage-service';
-import { ConfigService } from './config.service';
+import {Injectable} from '@angular/core';
+import {StorageType} from './storage-type.enum';
+import {Subscriber, Observable} from 'rxjs';
+import {StorageService} from './storage-service';
+import {ConfigService} from './config.service';
 
 @Injectable()
 export class SharedService {
@@ -10,13 +10,14 @@ export class SharedService {
     ? [this.config.options.tokenPrefix, this.config.options.tokenName].join(this.config.options.tokenSeparator)
     : this.config.options.tokenName;
 
-  constructor(private storage: StorageService, private config: ConfigService) {}
+  constructor(private storage: StorageService, private config: ConfigService) {
+  }
 
-  public getToken() {
+  public getToken(): string | null {
     return this.storage.get(this.tokenName);
   }
 
-  public getPayload(token = this.getToken()) {
+  public getPayload(token = this.getToken()): any {
     if (token && token.split('.').length === 3) {
       try {
         const base64Url = token.split('.')[1];
@@ -28,7 +29,7 @@ export class SharedService {
     }
   }
 
-  public setToken(response: string | object) {
+  public setToken(response: string | object): void {
     if (!response) {
       // console.warn('Can\'t set token without passing a value');
       return;
@@ -47,11 +48,11 @@ export class SharedService {
     }
   }
 
-  public removeToken() {
+  public removeToken(): void {
     this.storage.remove(this.tokenName);
   }
 
-  public isAuthenticated(token = this.getToken()) {
+  public isAuthenticated(token = this.getToken()): boolean {
     // a token is present
     if (token) {
       // token with a valid JWT format XXX.YYY.ZZZ
@@ -85,7 +86,7 @@ export class SharedService {
     return false;
   }
 
-  public getExpirationDate(token = this.getToken()) {
+  public getExpirationDate(token = this.getToken()): Date | null {
     const payload = this.getPayload(token);
     if (payload && payload.exp && Math.round(new Date().getTime() / 1000) < payload.exp) {
       const date = new Date(0);
@@ -96,18 +97,20 @@ export class SharedService {
   }
 
   public logout(): Observable<any> {
-    return Observable.create((observer: Subscriber<any>) => {
+    return new Observable<any>((observer: Subscriber<any>) => {
       this.storage.remove(this.tokenName);
       observer.next();
       observer.complete();
     });
   }
 
-  public setStorageType(type: StorageType) {
+  public setStorageType(type: StorageType): boolean {
     return this.storage.updateStorageType(type);
   }
 
-  private b64DecodeUnicode(str) {
-    return decodeURIComponent(Array.prototype.map.call(atob(str), c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
+  private b64DecodeUnicode(str): string {
+    return decodeURIComponent(Array.prototype.map
+      .call(atob(str), c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+      .join(''));
   }
 }

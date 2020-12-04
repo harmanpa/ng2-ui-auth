@@ -1,13 +1,14 @@
 {
   "name": "ng2-ui-auth",
-  "version": "11.0.0",
+  "version": "11.1.0",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",
     "test": "ng test",
     "lint": "ng lint",
-    "e2e": "ng e2e"
+    "e2e": "ng e2e",
+    "link": "cd ./dist/ng2-ui-auth && npm link"
   },
   "main": "dist/ng2-ui-auth/bundles/ng2-ui-auth.umd.js",
   "module": "dist/ng2-ui-auth/fesm5/ng2-ui-auth.js",
