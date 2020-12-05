@@ -22,5 +22,9 @@
         "dist/Ng2UiAuth"
       ]
     }
+  },
+  "angularCompilerOptions": {
+    "disableTypeScriptVersionCheck": true,
+    "enableIvy": false
   }
 }

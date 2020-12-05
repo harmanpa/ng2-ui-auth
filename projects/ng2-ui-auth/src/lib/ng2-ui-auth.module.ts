@@ -17,41 +17,31 @@ import {RedirectService} from './redirect.service';
 @NgModule({
   imports: [HttpClientModule],
   declarations: [RedirectDirective],
-  exports: []
+  exports: [],
+  providers: [
+    {provide: ConfigService, useClass: ConfigService},
+    {provide: StorageService, useClass: BrowserStorageService, deps: [ConfigService]},
+    {provide: SharedService, useClass: SharedService, deps: [StorageService, ConfigService, HttpClient]},
+    {provide: LocalService, useClass: LocalService, deps: [HttpClient, SharedService, ConfigService]},
+    {provide: PopupService, useClass: PopupService, deps: [ConfigService]},
+    {provide: OauthService, useClass: OauthService, deps: [HttpClient, SharedService, ConfigService, PopupService]},
+    {provide: AuthService, useClass: AuthService, deps: [SharedService, LocalService, OauthService]},
+    {provide: RedirectService, useClass: RedirectService, deps: [StorageService, SharedService]}
+  ]
 })
 export class Ng2UiAuthModule {
+
+  constructor() {
+  }
+
   static forRoot(configOptions: IPartialConfigOptions = {}, defaultJwtInterceptor = true): ModuleWithProviders<Ng2UiAuthModule> {
     return {
       ngModule: Ng2UiAuthModule,
       providers: [
         {provide: CONFIG_OPTIONS, useValue: configOptions},
-        {provide: ConfigService, useClass: ConfigService, deps: [CONFIG_OPTIONS]},
-        {provide: StorageService, useClass: BrowserStorageService, deps: [ConfigService]},
-        {provide: SharedService, useClass: SharedService, deps: [StorageService, ConfigService, HttpClient]},
-        {provide: LocalService, useClass: LocalService, deps: [HttpClient, SharedService, ConfigService]},
-        {provide: PopupService, useClass: PopupService, deps: [ConfigService]},
-        {provide: OauthService, useClass: OauthService, deps: [HttpClient, SharedService, ConfigService, PopupService]},
-        {provide: AuthService, useClass: AuthService, deps: [SharedService, LocalService, OauthService]},
-        {provide: RedirectService, useClass: RedirectService, deps: [StorageService, SharedService]},
         ...(defaultJwtInterceptor
           ? [{provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true, deps: [SharedService, ConfigService]}]
           : [])
-      ]
-    };
-  }
-
-  static forChild(): ModuleWithProviders<Ng2UiAuthModule> {
-    return {
-      ngModule: Ng2UiAuthModule,
-      providers: [
-        {provide: ConfigService, useClass: ConfigService},
-        {provide: StorageService, useClass: BrowserStorageService, deps: [ConfigService]},
-        {provide: SharedService, useClass: SharedService, deps: [StorageService, ConfigService, HttpClient]},
-        {provide: LocalService, useClass: LocalService, deps: [HttpClient, SharedService, ConfigService]},
-        {provide: PopupService, useClass: PopupService, deps: [ConfigService]},
-        {provide: OauthService, useClass: OauthService, deps: [HttpClient, SharedService, ConfigService, PopupService]},
-        {provide: AuthService, useClass: AuthService, deps: [SharedService, LocalService, OauthService]},
-        {provide: RedirectService, useClass: RedirectService, deps: [StorageService, SharedService]}
       ]
     };
   }
