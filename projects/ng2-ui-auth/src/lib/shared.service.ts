@@ -3,6 +3,9 @@ import {StorageType} from './storage-type.enum';
 import {Subscriber, Observable} from 'rxjs';
 import {StorageService} from './storage-service';
 import {ConfigService} from './config.service';
+import {IHierarchicalObject, IOauth1Options, IOauthOptions, ISimpleObject} from './config-interfaces';
+import {joinUrl} from './utils';
+import {HttpClient} from '@angular/common/http';
 
 @Injectable()
 export class SharedService {
@@ -10,7 +13,7 @@ export class SharedService {
     ? [this.config.options.tokenPrefix, this.config.options.tokenName].join(this.config.options.tokenSeparator)
     : this.config.options.tokenName;
 
-  constructor(private storage: StorageService, private config: ConfigService) {
+  constructor(private storage: StorageService, private config: ConfigService, private http: HttpClient) {
   }
 
   public getToken(): string | null {
@@ -106,6 +109,19 @@ export class SharedService {
 
   public setStorageType(type: StorageType): boolean {
     return this.storage.updateStorageType(type);
+  }
+
+  public exchangeForToken(oauthOptions: IOauthOptions,
+                          authorizationData: ISimpleObject,
+                          oauthData: ISimpleObject,
+                          userData: IHierarchicalObject): Observable<IHierarchicalObject> {
+    const body = oauthOptions['oauthType'] === '1.0'
+      ? {oauthOptions, authorizationData, oauthData, userData}
+      : {authorizationData, oauthData, userData};
+    const {withCredentials, baseUrl} = this.config.options;
+    const {method = 'POST', url} = oauthOptions;
+    const exchangeForTokenUrl = baseUrl ? joinUrl(baseUrl, url) : url;
+    return this.http.request<IHierarchicalObject>(method, exchangeForTokenUrl, {body, withCredentials});
   }
 
   private b64DecodeUnicode(str): string {

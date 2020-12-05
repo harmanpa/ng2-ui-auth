@@ -19,8 +19,11 @@ export declare class OauthService {
     } | {
         provide: typeof ConfigService;
         useValue: ConfigService;
+    } | {
+        provide: typeof SharedService;
+        useValue: SharedService;
     })[];
-    readonly deps: (typeof HttpClient | typeof ConfigService | typeof PopupService)[];
+    readonly deps: (typeof ConfigService | typeof HttpClient | typeof SharedService | typeof PopupService)[];
     constructor(http: HttpClient, shared: SharedService, config: ConfigService, popup: PopupService);
     authenticate(name: string, userData?: IHierarchicalObject): Observable<IHierarchicalObject>;
     getProvider(id: string | IOauthOptions): IOauthService;

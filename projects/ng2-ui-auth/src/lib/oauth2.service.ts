@@ -8,10 +8,13 @@ import {IOauthService} from './oauth-service';
 import {PopupService} from './popup.service';
 import {buildQueryString, expand, getWindowOrigin, joinUrl} from './utils';
 import {RedirectService} from './redirect.service';
+import {SharedService} from './shared.service';
 
 @Injectable()
 export class Oauth2Service implements IOauthService<IOauth2Options> {
-  constructor(private http: HttpClient, private popup: PopupService, private config: ConfigService, private redirect: RedirectService) {
+  constructor(private http: HttpClient, private popup: PopupService,
+              private config: ConfigService, private redirect: RedirectService,
+              private shared: SharedService) {
   }
 
   open(oauthOptions: IOauth2Options, userData: IHierarchicalObject): Observable<IHierarchicalObject> {
@@ -36,20 +39,9 @@ export class Oauth2Service implements IOauthService<IOauth2Options> {
         if (oauthData.state && oauthData.state !== authorizationData.state) {
           return throwError('OAuth "state" mismatch');
         }
-        return this.exchangeForToken(oauthOptions, authorizationData, oauthData, userData);
+        return this.shared.exchangeForToken(oauthOptions, authorizationData, oauthData, userData);
       })
     );
-  }
-
-  exchangeForToken(options: IOauth2Options,
-                   authorizationData: ISimpleObject,
-                   oauthData: ISimpleObject,
-                   userData: IHierarchicalObject): Observable<IHierarchicalObject> {
-    const body = {authorizationData, oauthData, userData};
-    const {baseUrl, withCredentials} = this.config.options;
-    const {url, method = 'POST'} = options;
-    const exchangeForTokenUrl = baseUrl ? joinUrl(baseUrl, url) : url;
-    return this.http.request<IHierarchicalObject>(method, exchangeForTokenUrl, {body, withCredentials});
   }
 
   private getAuthorizationData(options: IOauth2Options): ISimpleObject {

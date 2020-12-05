@@ -16,9 +16,10 @@ export class OauthService {
   readonly depProviders = [
     {provide: HttpClient, useValue: this.http},
     {provide: PopupService, useValue: this.popup},
-    {provide: ConfigService, useValue: this.config}
+    {provide: ConfigService, useValue: this.config},
+    {provide: SharedService, useValue: this.shared}
   ];
-  readonly deps = [HttpClient, PopupService, ConfigService];
+  readonly deps = [HttpClient, PopupService, ConfigService, SharedService];
 
   constructor(private http: HttpClient, private shared: SharedService,
               private config: ConfigService, private popup: PopupService) {

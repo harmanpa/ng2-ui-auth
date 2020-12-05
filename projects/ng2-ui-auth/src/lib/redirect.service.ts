@@ -1,18 +1,16 @@
 import {Injectable} from '@angular/core';
 import {Observable, of, throwError} from 'rxjs';
-import {AuthService} from './auth.service';
 import {StorageService} from './storage-service';
 import {buildQueryString, expand, flatten, getWindowOrigin, parseQueryString, staticify} from './utils';
 import {IHierarchicalObject, IOauth1Options, IOauth2Options, IOauthOptions, ISimpleObject} from './config-interfaces';
-import {OauthService} from './oauth.service';
 import {tap} from 'rxjs/operators';
 import {SharedService} from './shared.service';
 
 @Injectable()
 export class RedirectService {
 
-  constructor(private authService: AuthService, private storage: StorageService,
-              private oauth: OauthService, private shared: SharedService) {
+  constructor(private storage: StorageService,
+              private shared: SharedService) {
   }
 
   public go(url: string, options: IOauth2Options | IOauth1Options,
@@ -60,8 +58,7 @@ export class RedirectService {
         if (allParams.error) {
           throw throwError(allParams.error);
         } else {
-          return this.oauth.getProvider(optionsObject)
-            .exchangeForToken(optionsObject, authorizationData, allParams, userData)
+          return this.shared.exchangeForToken(optionsObject, authorizationData, allParams, userData)
             .pipe(tap(response => {
               this.shared.setToken(response);
               this.storage.remove('ng2-ui-auth-REDIRECT');

@@ -8,10 +8,13 @@ import {IOauthService} from './oauth-service';
 import {PopupService} from './popup.service';
 import {buildQueryString, joinUrl} from './utils';
 import {RedirectService} from './redirect.service';
+import {SharedService} from './shared.service';
 
 @Injectable()
 export class Oauth1Service implements IOauthService<IOauth1Options> {
-  constructor(private http: HttpClient, private popup: PopupService, private config: ConfigService, private redirect: RedirectService) {
+  constructor(private http: HttpClient, private popup: PopupService,
+              private config: ConfigService, private redirect: RedirectService,
+              private shared: SharedService) {
   }
 
   open(oauthOptions: IOauth1Options, userData: IHierarchicalObject): Observable<IHierarchicalObject> {
@@ -37,18 +40,7 @@ export class Oauth1Service implements IOauthService<IOauth1Options> {
           )
         )
       ),
-      switchMap(({authorizationData, oauthData}) => this.exchangeForToken(oauthOptions, authorizationData, oauthData, userData))
+      switchMap(({authorizationData, oauthData}) => this.shared.exchangeForToken(oauthOptions, authorizationData, oauthData, userData))
     );
-  }
-
-  exchangeForToken(oauthOptions: IOauth1Options,
-                   authorizationData: ISimpleObject,
-                   oauthData: ISimpleObject,
-                   userData: IHierarchicalObject): Observable<IHierarchicalObject> {
-    const body = {oauthOptions, authorizationData, oauthData, userData};
-    const {withCredentials, baseUrl} = this.config.options;
-    const {method = 'POST', url} = oauthOptions;
-    const exchangeForTokenUrl = baseUrl ? joinUrl(baseUrl, url) : url;
-    return this.http.request<IHierarchicalObject>(method, exchangeForTokenUrl, {body, withCredentials});
   }
 }
