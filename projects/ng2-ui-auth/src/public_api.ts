@@ -12,7 +12,7 @@ import {ConfigService, CONFIG_OPTIONS} from './lib/config.service';
 import {JwtInterceptor} from './lib/interceptor.service';
 import {IProviders} from './lib/config-interfaces';
 import {StorageType} from './lib/storage-type.enum';
-import {RedirectDirective} from './lib/redirect.directive';
+import {RedirectService} from './lib/redirect.service';
 /*
  * Public API Surface of ng2-ui-auth
  */
@@ -32,7 +32,7 @@ export {
   CONFIG_OPTIONS,
   IProviders,
   StorageType,
-  RedirectDirective
+  RedirectService
 };
 
 export * from './lib/config-interfaces';

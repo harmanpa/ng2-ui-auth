@@ -1321,37 +1321,6 @@
         { type: OauthService }
     ]; };
 
-    var RedirectDirective = /** @class */ (function () {
-        function RedirectDirective(redirect) {
-            this.redirect = redirect;
-            this.onLogin = new core.EventEmitter();
-            this.onLoginError = new core.EventEmitter();
-        }
-        RedirectDirective.prototype.ngOnInit = function () {
-            var _this = this;
-            if (this.redirect.isRedirect()) {
-                this.redirect.handleRedirect()
-                    .subscribe({
-                    next: function (value) { return _this.onLogin.emit(value); },
-                    error: function (err) { return _this.onLoginError.emit(err); }
-                });
-            }
-        };
-        return RedirectDirective;
-    }());
-    RedirectDirective.decorators = [
-        { type: core.Directive, args: [{
-                    selector: '[authRedirect]'
-                },] }
-    ];
-    RedirectDirective.ctorParameters = function () { return [
-        { type: RedirectService }
-    ]; };
-    RedirectDirective.propDecorators = {
-        onLogin: [{ type: core.Output }],
-        onLoginError: [{ type: core.Output }]
-    };
-
     var Ng2UiAuthModule = /** @class */ (function () {
         function Ng2UiAuthModule() {
         }
@@ -1361,7 +1330,15 @@
             return {
                 ngModule: Ng2UiAuthModule,
                 providers: __spread([
-                    { provide: CONFIG_OPTIONS, useValue: configOptions }
+                    { provide: CONFIG_OPTIONS, useValue: configOptions },
+                    { provide: ConfigService, useClass: ConfigService, deps: [CONFIG_OPTIONS] },
+                    { provide: StorageService, useClass: BrowserStorageService, deps: [ConfigService] },
+                    { provide: SharedService, useClass: SharedService, deps: [StorageService, ConfigService, http.HttpClient] },
+                    { provide: LocalService, useClass: LocalService, deps: [http.HttpClient, SharedService, ConfigService] },
+                    { provide: PopupService, useClass: PopupService, deps: [ConfigService] },
+                    { provide: OauthService, useClass: OauthService, deps: [http.HttpClient, SharedService, ConfigService, PopupService] },
+                    { provide: AuthService, useClass: AuthService, deps: [SharedService, LocalService, OauthService] },
+                    { provide: RedirectService, useClass: RedirectService, deps: [StorageService, SharedService] }
                 ], (defaultJwtInterceptor
                     ? [{ provide: http.HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true, deps: [SharedService, ConfigService] }]
                     : []))
@@ -1371,22 +1348,9 @@
     }());
     Ng2UiAuthModule.decorators = [
         { type: core.NgModule, args: [{
-                    imports: [http.HttpClientModule],
-                    declarations: [RedirectDirective],
-                    exports: [],
-                    providers: [
-                        { provide: ConfigService, useClass: ConfigService },
-                        { provide: StorageService, useClass: BrowserStorageService, deps: [ConfigService] },
-                        { provide: SharedService, useClass: SharedService, deps: [StorageService, ConfigService, http.HttpClient] },
-                        { provide: LocalService, useClass: LocalService, deps: [http.HttpClient, SharedService, ConfigService] },
-                        { provide: PopupService, useClass: PopupService, deps: [ConfigService] },
-                        { provide: OauthService, useClass: OauthService, deps: [http.HttpClient, SharedService, ConfigService, PopupService] },
-                        { provide: AuthService, useClass: AuthService, deps: [SharedService, LocalService, OauthService] },
-                        { provide: RedirectService, useClass: RedirectService, deps: [StorageService, SharedService] }
-                    ]
+                    imports: [http.HttpClientModule]
                 },] }
     ];
-    Ng2UiAuthModule.ctorParameters = function () { return []; };
 
     /**
      * Generated bundle index. Do not edit.
@@ -1403,10 +1367,9 @@
     exports.Oauth2Service = Oauth2Service;
     exports.OauthService = OauthService;
     exports.PopupService = PopupService;
-    exports.RedirectDirective = RedirectDirective;
+    exports.RedirectService = RedirectService;
     exports.SharedService = SharedService;
     exports.StorageService = StorageService;
-    exports.ɵa = RedirectService;
 
     Object.defineProperty(exports, '__esModule', { value: true });
 

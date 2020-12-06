@@ -4,6 +4,7 @@ import { StorageService } from './storage-service';
 import { ConfigService } from './config.service';
 import { IHierarchicalObject, IOauthOptions, ISimpleObject } from './config-interfaces';
 import { HttpClient } from '@angular/common/http';
+import * as ɵngcc0 from '@angular/core';
 export declare class SharedService {
     private storage;
     private config;
@@ -20,4 +21,8 @@ export declare class SharedService {
     setStorageType(type: StorageType): boolean;
     exchangeForToken(oauthOptions: IOauthOptions, authorizationData: ISimpleObject, oauthData: ISimpleObject, userData: IHierarchicalObject): Observable<IHierarchicalObject>;
     private b64DecodeUnicode;
+    static ɵfac: ɵngcc0.ɵɵFactoryDef<SharedService, never>;
+    static ɵprov: ɵngcc0.ɵɵInjectableDef<SharedService>;
 }
+
+//# sourceMappingURL=shared.service.d.ts.map

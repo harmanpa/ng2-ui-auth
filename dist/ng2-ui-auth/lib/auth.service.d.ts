@@ -4,6 +4,7 @@ import { OauthService } from './oauth.service';
 import { SharedService } from './shared.service';
 import { StorageType } from './storage-type.enum';
 import { IHierarchicalObject } from './config-interfaces';
+import * as ɵngcc0 from '@angular/core';
 export declare class AuthService {
     private shared;
     private local;
@@ -22,4 +23,8 @@ export declare class AuthService {
     getPayload(): any;
     setStorageType(type: StorageType): boolean;
     getExpirationDate(): Date | null;
+    static ɵfac: ɵngcc0.ɵɵFactoryDef<AuthService, never>;
+    static ɵprov: ɵngcc0.ɵɵInjectableDef<AuthService>;
 }
+
+//# sourceMappingURL=auth.service.d.ts.map

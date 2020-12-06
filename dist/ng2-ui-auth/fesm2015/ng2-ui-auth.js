@@ -1,4 +1,4 @@
-import { InjectionToken, Injectable, Inject, Injector, EventEmitter, Directive, Output, NgModule } from '@angular/core';
+import { InjectionToken, Injectable, Inject, Injector, NgModule } from '@angular/core';
 import { HttpClient, HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 import { Observable, of, throwError, merge, fromEvent, EMPTY, interval } from 'rxjs';
 import { delay, map, switchMap, take, tap, mergeMap } from 'rxjs/operators';
@@ -978,43 +978,20 @@ AuthService.ctorParameters = () => [
     { type: OauthService }
 ];
 
-class RedirectDirective {
-    constructor(redirect) {
-        this.redirect = redirect;
-        this.onLogin = new EventEmitter();
-        this.onLoginError = new EventEmitter();
-    }
-    ngOnInit() {
-        if (this.redirect.isRedirect()) {
-            this.redirect.handleRedirect()
-                .subscribe({
-                next: value => this.onLogin.emit(value),
-                error: err => this.onLoginError.emit(err)
-            });
-        }
-    }
-}
-RedirectDirective.decorators = [
-    { type: Directive, args: [{
-                selector: '[authRedirect]'
-            },] }
-];
-RedirectDirective.ctorParameters = () => [
-    { type: RedirectService }
-];
-RedirectDirective.propDecorators = {
-    onLogin: [{ type: Output }],
-    onLoginError: [{ type: Output }]
-};
-
 class Ng2UiAuthModule {
-    constructor() {
-    }
     static forRoot(configOptions = {}, defaultJwtInterceptor = true) {
         return {
             ngModule: Ng2UiAuthModule,
             providers: [
                 { provide: CONFIG_OPTIONS, useValue: configOptions },
+                { provide: ConfigService, useClass: ConfigService, deps: [CONFIG_OPTIONS] },
+                { provide: StorageService, useClass: BrowserStorageService, deps: [ConfigService] },
+                { provide: SharedService, useClass: SharedService, deps: [StorageService, ConfigService, HttpClient] },
+                { provide: LocalService, useClass: LocalService, deps: [HttpClient, SharedService, ConfigService] },
+                { provide: PopupService, useClass: PopupService, deps: [ConfigService] },
+                { provide: OauthService, useClass: OauthService, deps: [HttpClient, SharedService, ConfigService, PopupService] },
+                { provide: AuthService, useClass: AuthService, deps: [SharedService, LocalService, OauthService] },
+                { provide: RedirectService, useClass: RedirectService, deps: [StorageService, SharedService] },
                 ...(defaultJwtInterceptor
                     ? [{ provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true, deps: [SharedService, ConfigService] }]
                     : [])
@@ -1024,26 +1001,13 @@ class Ng2UiAuthModule {
 }
 Ng2UiAuthModule.decorators = [
     { type: NgModule, args: [{
-                imports: [HttpClientModule],
-                declarations: [RedirectDirective],
-                exports: [],
-                providers: [
-                    { provide: ConfigService, useClass: ConfigService },
-                    { provide: StorageService, useClass: BrowserStorageService, deps: [ConfigService] },
-                    { provide: SharedService, useClass: SharedService, deps: [StorageService, ConfigService, HttpClient] },
-                    { provide: LocalService, useClass: LocalService, deps: [HttpClient, SharedService, ConfigService] },
-                    { provide: PopupService, useClass: PopupService, deps: [ConfigService] },
-                    { provide: OauthService, useClass: OauthService, deps: [HttpClient, SharedService, ConfigService, PopupService] },
-                    { provide: AuthService, useClass: AuthService, deps: [SharedService, LocalService, OauthService] },
-                    { provide: RedirectService, useClass: RedirectService, deps: [StorageService, SharedService] }
-                ]
+                imports: [HttpClientModule]
             },] }
 ];
-Ng2UiAuthModule.ctorParameters = () => [];
 
 /**
  * Generated bundle index. Do not edit.
  */
 
-export { AuthService, BrowserStorageService, CONFIG_OPTIONS, ConfigService, JwtInterceptor, LocalService, Ng2UiAuthModule, Oauth1Service, Oauth2Service, OauthService, PopupService, RedirectDirective, SharedService, StorageService, StorageType, RedirectService as ɵa };
+export { AuthService, BrowserStorageService, CONFIG_OPTIONS, ConfigService, JwtInterceptor, LocalService, Ng2UiAuthModule, Oauth1Service, Oauth2Service, OauthService, PopupService, RedirectService, SharedService, StorageService, StorageType };
 //# sourceMappingURL=ng2-ui-auth.js.map
