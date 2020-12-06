@@ -1406,7 +1406,7 @@
     exports.RedirectDirective = RedirectDirective;
     exports.SharedService = SharedService;
     exports.StorageService = StorageService;
-    exports.ɵb = RedirectService;
+    exports.ɵa = RedirectService;
 
     Object.defineProperty(exports, '__esModule', { value: true });
 
