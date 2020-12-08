@@ -99,8 +99,8 @@ export class SharedService {
     return null;
   }
 
-  public logout(): Observable<any> {
-    return new Observable<any>((observer: Subscriber<any>) => {
+  public logout(): Observable<void> {
+    return new Observable<void>((observer: Subscriber<void>) => {
       this.storage.remove(this.tokenName);
       observer.next();
       observer.complete();

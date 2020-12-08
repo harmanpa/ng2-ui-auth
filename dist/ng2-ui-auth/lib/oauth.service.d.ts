@@ -5,7 +5,6 @@ import { HttpClient } from '@angular/common/http';
 import { IHierarchicalObject, IOauthOptions } from './config-interfaces';
 import { IOauthService } from './oauth-service';
 import { PopupService } from './popup.service';
-import * as ɵngcc0 from '@angular/core';
 export declare class OauthService {
     private http;
     private shared;
@@ -29,8 +28,4 @@ export declare class OauthService {
     authenticate(name: string, userData?: IHierarchicalObject): Observable<IHierarchicalObject>;
     getProvider(id: string | IOauthOptions): IOauthService;
     unlink<T>(provider: string, url?: string, method?: string): Observable<T>;
-    static ɵfac: ɵngcc0.ɵɵFactoryDef<OauthService, never>;
-    static ɵprov: ɵngcc0.ɵɵInjectableDef<OauthService>;
 }
-
-//# sourceMappingURL=oauth.service.d.ts.map

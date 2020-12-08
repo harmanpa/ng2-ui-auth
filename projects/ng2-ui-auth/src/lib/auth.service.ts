@@ -43,7 +43,7 @@ export class AuthService {
     return this.shared.getToken();
   }
 
-  public setToken(token: string | object): void {
+  public setToken(token: string | any): void {
     this.shared.setToken(token);
   }
 
