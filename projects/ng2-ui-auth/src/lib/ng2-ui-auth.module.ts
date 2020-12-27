@@ -28,7 +28,7 @@ export class Ng2UiAuthModule {
         {provide: SharedService, useClass: SharedService, deps: [StorageService, ConfigService, HttpClient]},
         {provide: LocalService, useClass: LocalService, deps: [HttpClient, SharedService, ConfigService]},
         {provide: PopupService, useClass: PopupService, deps: [ConfigService]},
-        {provide: OauthService, useClass: OauthService, deps: [HttpClient, SharedService, ConfigService, PopupService]},
+        {provide: OauthService, useClass: OauthService, deps: [HttpClient, SharedService, ConfigService, PopupService, RedirectService]},
         {provide: AuthService, useClass: AuthService, deps: [SharedService, LocalService, OauthService]},
         {provide: RedirectService, useClass: RedirectService, deps: [StorageService, SharedService]},
         ...(defaultJwtInterceptor

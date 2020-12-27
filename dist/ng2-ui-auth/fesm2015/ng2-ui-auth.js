@@ -853,18 +853,20 @@ Oauth2Service.ctorParameters = () => [
 ];
 
 class OauthService {
-    constructor(http, shared, config, popup) {
+    constructor(http, shared, config, popup, redirect) {
         this.http = http;
         this.shared = shared;
         this.config = config;
         this.popup = popup;
+        this.redirect = redirect;
         this.depProviders = [
             { provide: HttpClient, useValue: this.http },
             { provide: PopupService, useValue: this.popup },
             { provide: ConfigService, useValue: this.config },
+            { provide: RedirectService, useValue: this.redirect },
             { provide: SharedService, useValue: this.shared }
         ];
-        this.deps = [HttpClient, PopupService, ConfigService, SharedService];
+        this.deps = [HttpClient, PopupService, ConfigService, RedirectService, SharedService];
     }
     authenticate(name, userData) {
         const provider = this.getProvider(name);
@@ -895,7 +897,8 @@ OauthService.ctorParameters = () => [
     { type: HttpClient },
     { type: SharedService },
     { type: ConfigService },
-    { type: PopupService }
+    { type: PopupService },
+    { type: RedirectService }
 ];
 
 class LocalService {
@@ -989,7 +992,7 @@ class Ng2UiAuthModule {
                 { provide: SharedService, useClass: SharedService, deps: [StorageService, ConfigService, HttpClient] },
                 { provide: LocalService, useClass: LocalService, deps: [HttpClient, SharedService, ConfigService] },
                 { provide: PopupService, useClass: PopupService, deps: [ConfigService] },
-                { provide: OauthService, useClass: OauthService, deps: [HttpClient, SharedService, ConfigService, PopupService] },
+                { provide: OauthService, useClass: OauthService, deps: [HttpClient, SharedService, ConfigService, PopupService, RedirectService] },
                 { provide: AuthService, useClass: AuthService, deps: [SharedService, LocalService, OauthService] },
                 { provide: RedirectService, useClass: RedirectService, deps: [StorageService, SharedService] },
                 ...(defaultJwtInterceptor

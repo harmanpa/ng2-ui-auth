@@ -10,6 +10,7 @@ import {IOauthService} from './oauth-service';
 import {Oauth1Service} from './oauth1.service';
 import {Oauth2Service} from './oauth2.service';
 import {PopupService} from './popup.service';
+import {RedirectService} from './redirect.service';
 
 @Injectable()
 export class OauthService {
@@ -17,12 +18,14 @@ export class OauthService {
     {provide: HttpClient, useValue: this.http},
     {provide: PopupService, useValue: this.popup},
     {provide: ConfigService, useValue: this.config},
+    {provide: RedirectService, useValue: this.redirect},
     {provide: SharedService, useValue: this.shared}
   ];
-  readonly deps = [HttpClient, PopupService, ConfigService, SharedService];
+  readonly deps = [HttpClient, PopupService, ConfigService, RedirectService, SharedService];
 
   constructor(private http: HttpClient, private shared: SharedService,
-              private config: ConfigService, private popup: PopupService) {
+              private config: ConfigService, private popup: PopupService,
+              private redirect: RedirectService) {
   }
 
   public authenticate(name: string, userData?: IHierarchicalObject): Observable<IHierarchicalObject> {

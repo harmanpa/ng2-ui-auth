@@ -1188,18 +1188,20 @@
     ]; };
 
     var OauthService = /** @class */ (function () {
-        function OauthService(http$1, shared, config, popup) {
+        function OauthService(http$1, shared, config, popup, redirect) {
             this.http = http$1;
             this.shared = shared;
             this.config = config;
             this.popup = popup;
+            this.redirect = redirect;
             this.depProviders = [
                 { provide: http.HttpClient, useValue: this.http },
                 { provide: PopupService, useValue: this.popup },
                 { provide: ConfigService, useValue: this.config },
+                { provide: RedirectService, useValue: this.redirect },
                 { provide: SharedService, useValue: this.shared }
             ];
-            this.deps = [http.HttpClient, PopupService, ConfigService, SharedService];
+            this.deps = [http.HttpClient, PopupService, ConfigService, RedirectService, SharedService];
         }
         OauthService.prototype.authenticate = function (name, userData) {
             var _this = this;
@@ -1234,7 +1236,8 @@
         { type: http.HttpClient },
         { type: SharedService },
         { type: ConfigService },
-        { type: PopupService }
+        { type: PopupService },
+        { type: RedirectService }
     ]; };
 
     var LocalService = /** @class */ (function () {
@@ -1336,7 +1339,7 @@
                     { provide: SharedService, useClass: SharedService, deps: [StorageService, ConfigService, http.HttpClient] },
                     { provide: LocalService, useClass: LocalService, deps: [http.HttpClient, SharedService, ConfigService] },
                     { provide: PopupService, useClass: PopupService, deps: [ConfigService] },
-                    { provide: OauthService, useClass: OauthService, deps: [http.HttpClient, SharedService, ConfigService, PopupService] },
+                    { provide: OauthService, useClass: OauthService, deps: [http.HttpClient, SharedService, ConfigService, PopupService, RedirectService] },
                     { provide: AuthService, useClass: AuthService, deps: [SharedService, LocalService, OauthService] },
                     { provide: RedirectService, useClass: RedirectService, deps: [StorageService, SharedService] }
                 ], (defaultJwtInterceptor
